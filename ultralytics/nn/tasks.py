@@ -8,7 +8,7 @@ from copy import deepcopy
 from pathlib import Path
 
 import torch
-import torch.nn as nn
+from torch import nn
 
 from ultralytics.nn.autobackend import check_class_names
 from ultralytics.nn.modules import (
@@ -27,6 +27,8 @@ from ultralytics.nn.modules import (
     A2C2f,
     AConv,
     ADown,
+    BiFPN,
+    BiFPNBlock,
     Bottleneck,
     BottleneckCSP,
     C2f,
@@ -46,6 +48,8 @@ from ultralytics.nn.modules import (
     Detect,
     DWConv,
     DWConvTranspose2d,
+    # NMS-Free modules
+    DySample,
     Focus,
     GhostBottleneck,
     GhostConv,
@@ -63,21 +67,16 @@ from ultralytics.nn.modules import (
     RTDETRDecoder,
     SCDown,
     Segment,
+    SimAM,
     TorchVision,
     WorldDetect,
     YOLOEDetect,
     YOLOESegment,
     v10Detect,
-    # NMS-Free modules
-    DySample,
-    SimAM,
-    BiFPN,
-    BiFPNBlock,
 )
 from ultralytics.utils import DEFAULT_CFG_DICT, LOGGER, YAML, colorstr, emojis
 from ultralytics.utils.checks import check_requirements, check_suffix, check_yaml
 from ultralytics.utils.loss import (
-    E2EDetectLoss,
     v8ClassificationLoss,
     v8DetectionLoss,
     v8OBBLoss,
@@ -488,6 +487,7 @@ class DetectionModel(BaseModel):
         """Initialize the loss criterion for the DetectionModel."""
         if getattr(self, "end2end", False):
             from ultralytics.utils.nms_free_loss import E2EDetectLossWithRepulsion
+
             args = self.args if isinstance(self.args, dict) else vars(self.args)
             use_repulsion = args.get("use_repulsion", True)
             repulsion_weight = args.get("repulsion_weight", 0.5)
@@ -1340,11 +1340,9 @@ class SafeClass:
 
     def __init__(self, *args, **kwargs):
         """Initialize SafeClass instance, ignoring all arguments."""
-        pass
 
     def __call__(self, *args, **kwargs):
         """Run SafeClass instance, ignoring all arguments."""
-        pass
 
 
 class SafeUnpickler(pickle.Unpickler):
