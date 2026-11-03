@@ -19,14 +19,14 @@ Windows PowerShell 如果限制 npm.ps1，使用 npm.cmd 替代 npm。无需安�
 
 重新打开项目或重启应用，让新增技能被发现。在桌面版的 Skills 中选择相应技能；在支持技能文本调用的界面中可用下面的形式。
 
-| 技能 | 用途 | 例子 |
-|---|---|---|
-| openspec-explore | 调查代码并讨论方案 | `$openspec-explore 分析高密度检测测试集应如何构建` |
-| openspec-propose | 生成提案、规格、设计和任务 | `$openspec-propose 建立电动自行车拥堵场景评估集` |
-| openspec-apply-change | 实施一个已规划的变更 | `$openspec-apply-change <change-name>` |
-| openspec-update-change | 根据新信息调整计划 | `$openspec-update-change <change-name>` |
-| openspec-sync-specs | 将变更规范同步到主规范 | `$openspec-sync-specs <change-name>` |
-| openspec-archive-change | 归档已完成的变更 | `$openspec-archive-change <change-name>` |
+| 技能                    | 用途                       | 例子                                               |
+| ----------------------- | -------------------------- | -------------------------------------------------- |
+| openspec-explore        | 调查代码并讨论方案         | `$openspec-explore 分析高密度检测测试集应如何构建` |
+| openspec-propose        | 生成提案、规格、设计和任务 | `$openspec-propose 建立电动自行车拥堵场景评估集`   |
+| openspec-apply-change   | 实施一个已规划的变更       | `$openspec-apply-change <change-name>`             |
+| openspec-update-change  | 根据新信息调整计划         | `$openspec-update-change <change-name>`            |
+| openspec-sync-specs     | 将变更规范同步到主规范     | `$openspec-sync-specs <change-name>`               |
+| openspec-archive-change | 归档已完成的变更           | `$openspec-archive-change <change-name>`           |
 
 propose 工作流只产出规划，不在同一流程中自动实现。希望执行时，再明确使用 apply。具体可用的技能显示形式以当前界面为准；也可直接用自然语言点名相应工作流。
 
