@@ -17,6 +17,8 @@ Examples:
     >>> subprocess.run(f"onnxslim {f} {f} && open {f}", shell=True, check=True)  # pip install onnxslim
 """
 
+from .attention import EfficientSimAM, SimAM, SimAMBlock
+from .bifpn import BiFPN, BiFPNBlock, BiFPNConcat, FastNormalizedFusion
 from .block import (
     C1,
     C2,
@@ -77,8 +79,6 @@ from .conv import (
     SpatialAttention,
 )
 from .dysample import DySample, DySampleBlock
-from .attention import SimAM, EfficientSimAM, SimAMBlock
-from .bifpn import BiFPN, BiFPNBlock, BiFPNConcat, FastNormalizedFusion
 from .head import (
     OBB,
     Classify,
@@ -127,6 +127,9 @@ __all__ = (
     "ADown",
     "Attention",
     "BNContrastiveHead",
+    "BiFPN",
+    "BiFPNBlock",
+    "BiFPNConcat",
     "Bottleneck",
     "BottleneckCSP",
     "C2f",
@@ -150,6 +153,11 @@ __all__ = (
     "DeformableTransformerDecoder",
     "DeformableTransformerDecoderLayer",
     "Detect",
+    # NMS-Free modules
+    "DySample",
+    "DySampleBlock",
+    "EfficientSimAM",
+    "FastNormalizedFusion",
     "Focus",
     "GhostBottleneck",
     "GhostConv",
@@ -173,6 +181,8 @@ __all__ = (
     "ResNetLayer",
     "SCDown",
     "Segment",
+    "SimAM",
+    "SimAMBlock",
     "SpatialAttention",
     "TorchVision",
     "TransformerBlock",
@@ -182,14 +192,4 @@ __all__ = (
     "YOLOEDetect",
     "YOLOESegment",
     "v10Detect",
-    # NMS-Free modules
-    "DySample",
-    "DySampleBlock",
-    "SimAM",
-    "EfficientSimAM",
-    "SimAMBlock",
-    "BiFPN",
-    "BiFPNBlock",
-    "BiFPNConcat",
-    "FastNormalizedFusion",
 )
