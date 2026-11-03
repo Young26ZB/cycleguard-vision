@@ -15,7 +15,7 @@ torch>=1.8.0
 torchvision>=0.9.0
 
 # Evaluation/plotting extras (used by evaluate_model.py)
-seaborn>=0.11.0
+seaborn>=0.13.2
 
 # Optional experiment logging (install if you use them)
 # wandb
