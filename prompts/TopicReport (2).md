@@ -1,11 +1,10 @@
-
 北京邮电大学
 
 论文题目
 
 基于视觉互联的非机动车时空语义重构与违章行为检测研究
 
-__一、立题依据（包括研究目的、意义、国内外研究现状和发展趋势，需结合科学研究发展趋势来论述科学意义；或结合国民经济和社会发展中迫切需要解决的关键科技问题来论述其应用前景。附主要参考文献目录）（不少于800字）__
+**一、立题依据（包括研究目的、意义、国内外研究现状和发展趋势，需结合科学研究发展趋势来论述科学意义；或结合国民经济和社会发展中迫切需要解决的关键科技问题来论述其应用前景。附主要参考文献目录）（不少于800字）**
 
 （一）课题研究目的及意义
 
@@ -23,11 +22,11 @@ __一、立题依据（包括研究目的、意义、国内外研究现状和发
 
 复杂遮挡下的非线性多目标跟踪研究现状。多目标跟踪（Multiple Object Tracking, MOT）的主流范式是“检测\+关联”（Tracking\-by\-Detection）。经典的SORT及DeepSORT算法利用卡尔曼滤波预测位置，这在车辆匀速直线运动场景下表现良好，但在电动自行车急转弯或被遮挡时，线性预测会导致严重的定位漂移 \[9\]。 针对非线性运动与长时遮挡问题，CVPR 2023提出的OC\-SORT（Observation\-Centric SORT）代表了最新趋势\[10\]，该算法摒弃了对噪声敏感的状态估计，转而利用观测值本身来修正轨迹，极大提升了鲁棒性。在此基础上，Deep OC\-SORT进一步引入深度外观特征，解决了相似外观目标的ID切换问题\[11\]。针对遮挡恢复，Maggiolino等人近期提出的运动填充策略，利用遮挡前后的时空约束重构虚拟轨迹，这与本课题拟采用的ORU（观测中心再更新）机制不谋而合\[12\]。虽现有算法在一定程度上缓解了遮挡丢失问题，但大多仍基于行人的慢速运动或汽车的刚体运动假设，未能充分适应电动自行车“高机动性”（如弹射起步、急停急转）的动力学特性。本课题将针对这一不足，提出基于NSA\-Kalman（噪声尺度自适应）与ORU机制的非线性跟踪算法，通过引入检测置信度动态调整滤波增益，并利用后验观测反推遮挡期间的非线性轨迹，从而有效解决复杂路口转弯遮挡下的轨迹断裂与ID跳变问题。
 
-基于神经符号AI的可解释性认知研究现状。传统的交通违章判定多基于“规则硬编码”（如设置虚拟线圈），缺乏对车辆意图的理解，且无法处理复杂的语义场景（如借道避让）。近年来，研究人员致力于从各种角度或方法提升自动驾驶车辆的安全性\[13\-14\]，例如生成多样化的驾驶场景、模仿人类驾驶员的行为\[15\-16\]、通过强化学习（Reinforcement learning, RL）学习安全且鲁棒的策略\[17\-18\]。随着Transformer在时序建模上的成功，Trafficformer 等模型开始被用于预测车辆未来轨迹与意图，显著提升了判定的准确性\[19\]。 然而，纯深度学习模型缺乏逻辑可解释性，难以满足司法取证的严谨性要求。为了解决这一矛盾，神经符号人工智能（Neuro\-Symbolic AI）成为近两年的研究热点 \[20\-21\]。其中，逻辑张量网络（Logic Tensor Networks, LTN）  将一阶逻辑规则嵌入神经网络的损失函数中，实现了数据感知与逻辑推理的联合优化\[22\]。Xiangkun He等人开始尝试将LTN应用于自动驾驶的安全性验证中，证明了将交通法规“数学化”并指导模型训练的可行性\[23\]。现有研究虽然探索了意图预测与逻辑推理的结合，但大多停留在仿真环境或单一任务中，缺乏将“视觉感知误差”、“物理空间重构”与“法规逻辑推理”打通的统一框架，导致系统依然是不可解释的“黑盒”。本课题将引入神经符号AI范式，构建基于逻辑张量网络（LTN）的可解释性认知层，将交通法规转化为可微的逻辑约束，结合单目视觉的物理重构技术，实现从“像素级感知”到“语义级逻辑判定”的跨越，确保违章判定的每一条记录都具备完整的逻辑证据链。
+基于神经符号AI的可解释性认知研究现状。传统的交通违章判定多基于“规则硬编码”（如设置虚拟线圈），缺乏对车辆意图的理解，且无法处理复杂的语义场景（如借道避让）。近年来，研究人员致力于从各种角度或方法提升自动驾驶车辆的安全性\[13\-14\]，例如生成多样化的驾驶场景、模仿人类驾驶员的行为\[15\-16\]、通过强化学习（Reinforcement learning, RL）学习安全且鲁棒的策略\[17\-18\]。随着Transformer在时序建模上的成功，Trafficformer 等模型开始被用于预测车辆未来轨迹与意图，显著提升了判定的准确性\[19\]。 然而，纯深度学习模型缺乏逻辑可解释性，难以满足司法取证的严谨性要求。为了解决这一矛盾，神经符号人工智能（Neuro\-Symbolic AI）成为近两年的研究热点 \[20\-21\]。其中，逻辑张量网络（Logic Tensor Networks, LTN） 将一阶逻辑规则嵌入神经网络的损失函数中，实现了数据感知与逻辑推理的联合优化\[22\]。Xiangkun He等人开始尝试将LTN应用于自动驾驶的安全性验证中，证明了将交通法规“数学化”并指导模型训练的可行性\[23\]。现有研究虽然探索了意图预测与逻辑推理的结合，但大多停留在仿真环境或单一任务中，缺乏将“视觉感知误差”、“物理空间重构”与“法规逻辑推理”打通的统一框架，导致系统依然是不可解释的“黑盒”。本课题将引入神经符号AI范式，构建基于逻辑张量网络（LTN）的可解释性认知层，将交通法规转化为可微的逻辑约束，结合单目视觉的物理重构技术，实现从“像素级感知”到“语义级逻辑判定”的跨越，确保违章判定的每一条记录都具备完整的逻辑证据链。
 
 参考文献：
 
-\[1\] J\.P\. Schepers,  E\. Fishman,  P\. den Hertog,  et al\.\.The safety of electrically assisted bicycles compared to classic bicycles\[J\]\.Heliyon,2014,73:174\-180\.
+\[1\] J\.P\. Schepers, E\. Fishman, P\. den Hertog, et al\.\.The safety of electrically assisted bicycles compared to classic bicycles\[J\]\.Heliyon,2014,73:174\-180\.
 
 \[2\] ZHOU N, ZENG H, XIE R, et al\. Analysis of road traffic accidents and casualties associated with electric bikes and bicycles in Guangzhou, China: a retrospective descriptive analysis\[J\]\. Heliyon, 2024, 10\(9\): e29961\.
 
@@ -35,7 +34,7 @@ __一、立题依据（包括研究目的、意义、国内外研究现状和发
 
 \[4\] C\.J\. DiMaggio, et al\. Injuries associated with electric\-powered bikes and scooters: analysis of US consumer product data\[J\]\. Injury Prevention, 2020, 26\(6\): 524\-528\.
 
-\[5\] Jocher  G, Chaurasia A, Qiu, J\. YOLOv8: a new state\-of\-the\-art object detection model\[R\]\. arXiv preprint arXiv:2301\.06674, 2023\.
+\[5\] Jocher G, Chaurasia A, Qiu, J\. YOLOv8: a new state\-of\-the\-art object detection model\[R\]\. arXiv preprint arXiv:2301\.06674, 2023\.
 
 \[6\] Wang A, Chen H, et al\. YOLOv10: real\-time end\-to\-end object detection\[R\]\. arXiv preprint arXiv:2405\.14458, 2024\.
 
@@ -73,7 +72,7 @@ __一、立题依据（包括研究目的、意义、国内外研究现状和发
 
 \[23\] Xiangkun He, Jingda Wu, Zhiyu Huang, et al\., Fear\-neuro\-inspired reinforcement learning for safe autonomous driving\[J\]\. IEEE Transactions on Pattern Analysis and Machine Intelligence, 2024, 46\(1\): 267\-279\.
 
-__二、研究内容和目标（说明课题的具体研究内容，研究目标和效果，以及拟解决的关键科学问题。此部分为重点阐述内容）（不少于2500字）__
+**二、研究内容和目标（说明课题的具体研究内容，研究目标和效果，以及拟解决的关键科学问题。此部分为重点阐述内容）（不少于2500字）**
 
 （一）研究内容
 
@@ -143,7 +142,7 @@ __二、研究内容和目标（说明课题的具体研究内容，研究目标
 
 深度学习擅长处理连续变化的图像数据（如概率、特征），这属于直觉感知范畴；而交通法规是严谨、离散的符号逻辑（如“是/否”判定），属于理性推理范畴。现有系统往往将两者割裂，导致模型变成了“黑盒”，知其然不知其所以然。如何构建一个统一的可微计算框架，将神经网络输出的连续概率“翻译”为离散的逻辑概念，并将人类制定的硬性交通规则转化为可用于指导模型训练的软性数学约束，从而打破感知与推理的壁垒，实现两者的联合优化，是认知层致力于攻克的深层次科学问题。
 
-__三、研究方案设计及可行性分析（包括：研究方法，技术路线，理论分析、计算、实验方法和步骤及其可行性等）（不少于800字）__
+**三、研究方案设计及可行性分析（包括：研究方法，技术路线，理论分析、计算、实验方法和步骤及其可行性等）（不少于800字）**
 
 （一）研究方法
 
@@ -167,19 +166,19 @@ __三、研究方案设计及可行性分析（包括：研究方法，技术路
 
 本步骤旨在解决密集场景下的目标粘连与抑制问题，我们基于二分匹配理论构建双分支检测头。首先建立最佳匹配机制，设真实目标集合为![](TopicReport (2)_assets/image_006.png)，预测集合为![](TopicReport (2)_assets/image_007.png)，最佳匹配排列![](TopicReport (2)_assets/image_008.png)通过最小化全局匹配代价获得：
 
-	![](TopicReport (2)_assets/image_009.png)	
+    ![](TopicReport (2)_assets/image_009.png)
 
 其中单项匹配代价![](TopicReport (2)_assets/image_010.png)包含分类与回归两部分：
 
-	![](TopicReport (2)_assets/image_011.png)	
+    ![](TopicReport (2)_assets/image_011.png)
 
 在此基础上，为强行分离粘连的预测框，我们引入排斥损失![](TopicReport (2)_assets/image_012.png)，构建物理排斥场。该损失包含对非匹配真实框的排斥（RepGT）和对周围预测框的排斥（RepBox）：
 
-	![](TopicReport (2)_assets/image_013.png)	
+    ![](TopicReport (2)_assets/image_013.png)
 
-	![](TopicReport (2)_assets/image_014.png)	
+    ![](TopicReport (2)_assets/image_014.png)
 
-	![](TopicReport (2)_assets/image_015.png)	
+    ![](TopicReport (2)_assets/image_015.png)
 
 该公式在数学上保证了预测框在靠近目标的同时，受到周围非目标的“斥力”，从而清晰划定实例边界。
 
@@ -187,21 +186,21 @@ __三、研究方案设计及可行性分析（包括：研究方法，技术路
 
 本步骤利用物理模型解决遮挡与非线性运动问题。针对互遮挡导致的状态估计不准，构建NSA\-Kalman滤波器，引入与检测置信度![](TopicReport (2)_assets/image_016.png)负相关的自适应观测噪声协方差![](TopicReport (2)_assets/image_017.png)：
 
-	![](TopicReport (2)_assets/image_018.png)	
+    ![](TopicReport (2)_assets/image_018.png)
 
 状态更新阶段的卡尔曼增益![](TopicReport (2)_assets/image_019.png)随之修正为：
 
-	![](TopicReport (2)_assets/image_020.png)	
+    ![](TopicReport (2)_assets/image_020.png)
 
-	![](TopicReport (2)_assets/image_021.png)	
+    ![](TopicReport (2)_assets/image_021.png)
 
 当![](TopicReport (2)_assets/image_022.png)时，![](TopicReport (2)_assets/image_023.png)增大导致![](TopicReport (2)_assets/image_024.png)，滤波器自动拒绝不可靠观测，依赖先验预测保持轨迹平滑。针对转弯遮挡导致的轨迹断裂，利用OC\-SORT模块构建虚拟轨迹。利用目标重现时刻![](TopicReport (2)_assets/image_025.png)与消失时刻![](TopicReport (2)_assets/image_026.png)的观测值，插值计算遮挡期间的虚拟位置![](TopicReport (2)_assets/image_027.png)：
 
-	![](TopicReport (2)_assets/image_028.png)	
+    ![](TopicReport (2)_assets/image_028.png)
 
 利用该虚拟序列反向修正协方差矩阵，使滤波器能迅速收敛至真实的非线性运动轨迹。最后引入OCM观测中心动量计算：
 
-	![](TopicReport (2)_assets/image_029.png)	
+    ![](TopicReport (2)_assets/image_029.png)
 
 利用观测差分计算瞬时速度，消除起步滞后。
 
@@ -209,25 +208,25 @@ __三、研究方案设计及可行性分析（包括：研究方法，技术路
 
 本步骤实现从像素到物理、从感知到认知的跨越。首先进行单目物理测速，基于逆透视变换（IPM），利用单应性矩阵![](TopicReport (2)_assets/image_030.png)将像素坐标![](TopicReport (2)_assets/image_031.png)映射为世界坐标![](TopicReport (2)_assets/image_032.png)：
 
-	![](TopicReport (2)_assets/image_033.png)	
+    ![](TopicReport (2)_assets/image_033.png)
 
 从而计算真实的物理速度![](TopicReport (2)_assets/image_034.png)，消除视觉误差：
 
-	![](TopicReport (2)_assets/image_035.png)	
+    ![](TopicReport (2)_assets/image_035.png)
 
 其次进行意图预测，利用Trafficformer的自注意力机制捕捉长时序依赖，判别避让意图：
 
-	![](TopicReport (2)_assets/image_036.png)	
+    ![](TopicReport (2)_assets/image_036.png)
 
 最关键的是神经符号推理，利用LTN将交通法规转化为可微函数。定义“违章”规则![](TopicReport (2)_assets/image_037.png)：
 
-	![](TopicReport (2)_assets/image_038.png)	
+    ![](TopicReport (2)_assets/image_038.png)
 
 采用Gödel t\-norm算子计算逻辑满意度![](TopicReport (2)_assets/image_039.png)，并将其作为损失函数的一部分进行端到端优化：
 
-	![](TopicReport (2)_assets/image_040.png)	
+    ![](TopicReport (2)_assets/image_040.png)
 
-	![](TopicReport (2)_assets/image_041.png)	
+    ![](TopicReport (2)_assets/image_041.png)
 
 这确保了神经网络的输出严格符合交通法规的逻辑约束，实现100%的逻辑可解释性。
 
@@ -245,7 +244,7 @@ __三、研究方案设计及可行性分析（包括：研究方法，技术路
 
 （4）研究计划与工作量的可控性。从时间安排上看，课题研究与硕士培养计划同步推进：前期完成文献调研与数据集构建，中期以算法设计和实验验证为主，后期以系统集成与论文撰写为重点，阶段划分清晰、工作内容明确。每一阶段均有可量化的阶段性成果（如完成数据集构建、完成检测/跟踪模块、完成行为判定模块、实现系统原型并完成系列实验等），便于在导师指导下进行过程管理和风险控制。整体上，课题研究目标明确、技术路线合理、工作量与时间窗口匹配，具备良好的可行性。
 
-__四、本研究课题可能的创新之处（不少于500字）__
+**四、本研究课题可能的创新之处（不少于500字）**
 
 （一）面向高密度拥堵场景的NMS\-Free端到端感知架构
 
@@ -259,7 +258,7 @@ __四、本研究课题可能的创新之处（不少于500字）__
 
 针对传统违章判定方法缺乏行为意图理解（易将避让行为误判为逆行）且判定结果缺乏逻辑证据（黑盒模型无法解释判定依据）的局限，本课题在认知层实现了从“黑盒感知”到“白盒推理”的范式转变。本研究引入逻辑张量网络（LTN），构建了一个端到端可微的神经符号推理引擎，将神经网络感知的连续变量“落地”为离散的逻辑谓词，并将交通法规形式化为一阶逻辑规则，通过实值逻辑算子将规则转化为损失函数进行优化，使得系统输出包含完整证据链（如规则引用\+关键状态数据）的结构化结果，实现了100%的逻辑可解释性。在此基础上，本研究结合单目视觉几何重构（IPM）与Trafficformer意图预测模型，不仅消除了视觉误差实现了基于真实物理速度的判定，更能利用长时序建模预测车辆未来的行驶意图（如避让积水后回归），有效过滤因受迫性驾驶行为导致的“假逆行”误报，显著提升了系统的鲁棒性与执法的人性化水平。
 
-__五、研究基础与工作条件（1\.与本项目相关的研究工作积累基础 2\.包括已具备的实验条件，尚缺少的实验条件和拟解决途径）（不少于500字）__
+**五、研究基础与工作条件（1\.与本项目相关的研究工作积累基础 2\.包括已具备的实验条件，尚缺少的实验条件和拟解决途径）（不少于500字）**
 
 （一）与本课题相关的研究工作积累基础
 
@@ -273,7 +272,7 @@ __五、研究基础与工作条件（1\.与本项目相关的研究工作积累
 
 实验室目前已具备能够支撑本课题开展的基础软硬件环境，并制定了“本地调试\+云端训练”的混合资源调度方案以应对算力挑战。在硬件与计算资源上，实验室拥有一台搭载最新 NVIDIA RTX 5090 的高性能工作站，能够满足模型原型设计与小批量代码调试的需求，而针对大规模视频数据的全量训练与超参数搜索任务，课题组将深度依赖高性能云计算平台（Cloud Computing）提供的弹性算力资源，并利用大容量云存储服务保障海量专属数据集的安全性与高效存取；在软件环境上，已搭建包含 PyTorch、TensorFlow 及 OpenCV 在内的全栈开发平台；针对目前尚缺乏边缘端嵌入式部署环境的不足，课题组拟采取针对性措施性，计划采购 NVIDIA Jetson AGX Orin 开发板，结合 TensorRT 量化技术搭建边缘仿真平台，从而弥补边缘端实验条件的缺失，实现从云端训练到边缘落地的全链路验证。
 
-__学位论文工作计划__
+**学位论文工作计划**
 
 时间
 
@@ -323,21 +322,20 @@ __学位论文工作计划__
 
 完成高质量硕士学位论文，公开发表学术成果，顺利通过学位论文答辩。
 
-__导师意见__
+**导师意见**
 
 通过开题报告。
 
 导师（签名）：
 
-日期：     年    月    日
+日期： 年 月 日
 
-__评审结果__
+**评审结果**
 
 经学院组织评审，该生开题评审结果为：
 
-□通过      □未通过
+□通过 □未通过
 
 学院负责人签字（盖章）：
 
                                   日期：     年    月    日
-
