@@ -93,7 +93,7 @@ class Predictor(BasePredictor):
         """
         if overrides is None:
             overrides = {}
-        overrides.update(dict(task="segment", mode="predict", batch=1))
+        overrides.update({"task": "segment", "mode": "predict", "batch": 1})
         super().__init__(cfg, overrides, _callbacks)
         self.args.retina_masks = True
         self.im = None
@@ -1153,7 +1153,7 @@ class SAM2VideoPredictor(SAM2Predictor):
         # temporary outputs have been added (either in this call or any previous calls
         # to `propagate_in_video_preflight`).
         consolidated_frame_inds = self.inference_state["consolidated_frame_inds"]
-        for is_cond in {False, True}:
+        for is_cond in (False, True):
             # Separately consolidate conditioning and non-conditioning temp outputs
             storage_key = "cond_frame_outputs" if is_cond else "non_cond_frame_outputs"
             # Find all the frames that contain temporary outputs for any objects
@@ -1855,7 +1855,7 @@ class SAM2DynamicInteractivePredictor(SAM2Predictor):
                 consolidated_out["pred_masks"][obj_idx : obj_idx + 1] = obj_mask
                 consolidated_out["obj_ptr"][obj_idx : obj_idx + 1] = out["obj_ptr"]
 
-                if "object_score_logits" in out.keys():
+                if "object_score_logits" in out:
                     consolidated_out["object_score_logits"][obj_idx : obj_idx + 1] = out["object_score_logits"]
 
         high_res_masks = F.interpolate(
