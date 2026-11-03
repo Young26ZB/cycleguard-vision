@@ -9,11 +9,12 @@ path: ../../../ebike # Relative to this YAML; train_ebike.py resolves it before 
 # Train/val/test splits (relative to 'path')
 train: images/train
 val: images/val
-test: images/test  # Optional
+test: images/test # Optional
 
 # Class names
 names:
-  0: ebike  # Electric bicycle
+  0: ebike # Electric bicycle
+
 
 # Dataset statistics (update after analyzing your data)
 # These are example values - replace with your actual statistics
