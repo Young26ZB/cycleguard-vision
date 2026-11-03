@@ -1,0 +1,61 @@
+schema: spec-driven
+
+context: |
+  Language: zh-CN
+  All artifacts must be written in zh-CN.
+  Keep OpenSpec structural headings and SHALL/MUST keywords in English.
+  项目是基于 Python、PyTorch、Ultralytics YOLO11 的电动自行车检测研究仓库。
+  研究分为三部分：高密度拥堵场景 NMS-Free 检测；复杂遮挡下非线性时空跟踪；神经符号 AI 违章判定与证据留存。
+  截至 2026-11-02，主要实现是第一部分；第二、三部分主要为设计文档，不能将框架自带跟踪器视为自研方案已完成。
+  第一阶段实现与验证记录见 STAGE1.md；训练/推理/评估入口为 train_ebike.py、inference_ebike.py、evaluate_model.py。
+  基础配置 yolo11-ebike.yaml；增强配置 yolo11-nms-free.yaml 含 DySample、SimAM，尚未接入 BiFPN。
+  双分支采用 TaskAlignedAssigner 的 topk=10/1，不是全局二分匹配；不承诺任意遮挡下都能识别。
+  开发机为 Windows PowerShell；后续真实数据训练在阿里云 Linux 虚拟机。未经用户另行要求，不在本机启动训练。
+  本地可运行静态检查和不含优化器更新的合成张量检查；GPU、真实数据、效果评估需独立报告，未执行不得标记已通过。
+  不自动修改、删除数据集、历史权重或实验结果。路径应可配置，不写死某台机器的绝对路径。
+  OpenSpec 使用项目本地 CLI：将文档中的 openspec 命令写成 npm run openspec -- <args>；无需全局安装。
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always state what is out of scope
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
+
+# Per-operation guidance (optional)
+# Add advisory guidance for how apply and archive work should be conducted.
+# This is separate from artifact rules above.
+# Example:
+#   operations:
+#     apply:
+#       guidance:
+#         - Keep test summaries concise
+#     archive:
+#       guidance:
+#         - Summarize the archive outcome before finishing
+
+rules:
+  proposal:
+    - 明确变更属于哪一研究部分，说明问题、范围和成功标准。
+    - 区分已有实现、待实现能力和待实验验证的假设，不虚构性能收益。
+  specs:
+    - 每项 Requirement 使用 SHALL 或 MUST，至少提供一个 WHEN/THEN Scenario。
+    - 算法要求应写明输入输出、匹配关系、坐标单位及适用边界。
+  design:
+    - 说明与现有 Ultralytics 链路的接入位置、兼容性和数值稳定性。
+    - 训练相关变更说明数据划分、公平对照及实验记录方式。
+  tasks:
+    - 将代码实现、本地非训练检查、云端真实数据训练与效果评估分别列为任务。
+    - 每项任务给出可核查的完成标准，云端尚未执行的任务保持未完成。
+
+operations:
+  apply:
+    guidance:
+      - 优先运行与改动直接相关的非训练检查，沿用用户的本机不训练约束。
+      - 汇报实际修改、执行过的检查和未验证项，保留原始数据与历史实验。
+  archive:
+    guidance:
+      - 同步规范与实际实现；未完成的云端验证应明确保留，不以文档归档代替实验完成。

@@ -1,0 +1,54 @@
+# Ultralytics 🚀 AGPL-3.0 License - https://ultralytics.com/license
+
+# Electric Bicycle Detection Dataset Configuration
+# This is a template - update paths to match your dataset location
+
+# Dataset root path (absolute path recommended)
+path: ../../../ebike # Relative to this YAML; train_ebike.py resolves it before training
+
+# Train/val/test splits (relative to 'path')
+train: images/train
+val: images/val
+test: images/test  # Optional
+
+# Class names
+names:
+  0: ebike  # Electric bicycle
+
+# Dataset statistics (update after analyzing your data)
+# These are example values - replace with your actual statistics
+# nc: 1
+# train_images: 10000
+# val_images: 2000
+# test_images: 1000
+
+# Notes for dataset preparation:
+# 1. Directory structure should be:
+#    datasets/ebike/
+#    ├── images/
+#    │   ├── train/
+#    │   │   ├── img001.jpg
+#    │   │   └── ...
+#    │   ├── val/
+#    │   │   ├── img001.jpg
+#    │   │   └── ...
+#    │   └── test/  (optional)
+#    │       └── ...
+#    └── labels/
+#        ├── train/
+#        │   ├── img001.txt
+#        │   └── ...
+#        ├── val/
+#        │   └── ...
+#        └── test/  (optional)
+#            └── ...
+#
+# 2. Label format (YOLO format):
+#    Each line: <class_id> <x_center> <y_center> <width> <height>
+#    All values are normalized (0-1)
+#    Example: 0 0.5 0.5 0.1 0.2
+#
+# 3. For high-density scenes:
+#    - Ensure all overlapping e-bikes are labeled
+#    - Use consistent labeling for partially occluded vehicles
+#    - Include the rider as part of the e-bike bounding box
