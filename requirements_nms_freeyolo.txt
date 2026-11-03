@@ -11,7 +11,7 @@ polars>=0.20.0
 ultralytics-thop>=2.0.18
 
 # PyTorch (install a CUDA-matching build on AutoDL if needed)
-torch>=1.8.0
+torch>=2.14.1
 torchvision>=0.9.0
 
 # Evaluation/plotting extras (used by evaluate_model.py)
