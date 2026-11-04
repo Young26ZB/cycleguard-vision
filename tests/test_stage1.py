@@ -16,6 +16,7 @@ import torch.nn.functional as F
 from train_ebike import ROOT, get_model_config, get_data_config, resolve_data_config
 from ultralytics import YOLO
 from ultralytics.cfg import get_cfg
+from ultralytics.nn.modules.block import BNContrastiveHead, ContrastiveHead
 from ultralytics.nn.modules.dysample import DySample
 from ultralytics.utils import DEFAULT_CFG_DICT, YAML
 from ultralytics.utils.nms_free_loss import NMSFreeBboxLoss
@@ -36,14 +37,25 @@ class StageOneTests(unittest.TestCase):
         self.assertFalse(cfg.use_repulsion)
         self.assertEqual(cfg.repulsion_weight, 0.25)
         with tempfile.TemporaryDirectory(dir=ROOT) as tmp:
-            resolved = resolve_data_config(get_data_config('ebike.yaml'), '', tmp)
-            self.assertEqual(Path(YAML.load(resolved)['path']), ROOT / 'ebike')
-            for split in ('train', 'val'):
-                (Path(tmp) / split).mkdir()
-            source = Path(tmp) / 'custom.yaml'
-            YAML.save(source, {'path': '.', 'train': 'train', 'val': 'val', 'names': {0: 'ebike'}})
-            result = resolve_data_config(str(source), '', tmp)
-            self.assertEqual(Path(YAML.load(result)['path']), Path(tmp))
+            config = Path(get_data_config('ebike.yaml'))
+            source = Path(tmp) / config.relative_to(ROOT)
+            source.parent.mkdir(parents=True)
+            source.write_bytes(config.read_bytes())
+            data_root = Path(tmp) / 'ebike'
+            (data_root / 'images/train').mkdir(parents=True)
+            (data_root / 'images/val').mkdir()
+            resolved = resolve_data_config(str(source), '', tmp)
+            self.assertEqual(Path(YAML.load(resolved)['path']), data_root)
+            self.assertEqual(source.read_bytes(), config.read_bytes())
+
+    def test_world_head_preserves_contrastive_batch_norm_option(self):
+        YOLO(get_model_config('yolo11-ebike.yaml', 'n'), verbose=False)
+        for variant, expected_head in [('world', ContrastiveHead), ('worldv2', BNContrastiveHead)]:
+            with self.subTest(variant=variant):
+                model = YOLO(f'yolov8s-{variant}.yaml', verbose=False)
+                head = model.model.model[-1]
+                self.assertIsInstance(head.cv4[0], expected_head)
+                self.assertFalse(head.end2end)
 
     def test_zero_offset_sampling(self):
         for style in ('lp', 'pl'):
@@ -100,11 +112,14 @@ class StageOneTests(unittest.TestCase):
     def test_pretrained_does_not_replace_architecture(self):
         from train_ebike import parse_args, train
         with tempfile.TemporaryDirectory(dir=ROOT) as tmp:
+            data_root = Path(tmp) / 'dataset'
+            (data_root / 'images/train').mkdir(parents=True)
+            (data_root / 'images/val').mkdir()
             source = YOLO(get_model_config('yolo11.yaml', 'n'), verbose=False)
             weights = Path(tmp) / 'source.pt'
             source.save(weights)
             argv = ['train_ebike.py', '--model', 'yolo11-ebike.yaml', '--pretrained', str(weights),
-                    '--project', tmp, '--check-only']
+                    '--data-root', str(data_root), '--project', tmp, '--check-only']
             with patch('sys.argv', argv), patch.object(YOLO, 'train') as training:
                 self.assertIsNone(train(parse_args()))
                 training.assert_not_called()

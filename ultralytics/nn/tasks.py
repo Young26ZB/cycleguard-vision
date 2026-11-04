@@ -1586,6 +1586,7 @@ def parse_model(d, ch, verbose=True):
         }
     )
     for i, (f, n, m, args) in enumerate(d["backbone"] + d["head"]):  # from, number, module, args
+        kwargs = {}
         m = (
             getattr(torch.nn, m[3:])
             if "nn." in m
@@ -1637,16 +1638,14 @@ def parse_model(d, ch, verbose=True):
         elif m in frozenset(
             {Detect, WorldDetect, YOLOEDetect, Segment, YOLOESegment, Pose, OBB, ImagePoolingAttn, v10Detect}
         ):
-            # Handle end2end flag for NMS-free detection
-            end2end = False
-            if len(args) > 0 and isinstance(args[-1], bool):
-                end2end = args.pop()  # Remove end2end from args
+            # Only Detect uses a trailing boolean for NMS-free detection.
+            if m is Detect and args and isinstance(args[-1], bool):
+                kwargs["end2end"] = args.pop()
             args.append([ch[x] for x in f])
             if m is Segment or m is YOLOESegment:
                 args[2] = make_divisible(min(args[2], max_channels) * width, 8)
             if m in {Detect, YOLOEDetect, Segment, YOLOESegment, Pose, OBB}:
                 m.legacy = legacy
-                m.end2end = end2end  # Set before __init__ creates the one-to-one branch
         elif m is RTDETRDecoder:  # special case, channels arg must be passed in index 1
             args.insert(1, [ch[x] for x in f])
         elif m is CBLinear:
@@ -1676,9 +1675,7 @@ def parse_model(d, ch, verbose=True):
         else:
             c2 = ch[f]
 
-        m_ = torch.nn.Sequential(*(m(*args) for _ in range(n))) if n > 1 else m(*args)  # module
-        if m in {Detect, YOLOEDetect, Segment, YOLOESegment, Pose, OBB}:
-            m_.end2end = end2end  # Freeze per instance; later models must not change earlier heads.
+        m_ = torch.nn.Sequential(*(m(*args, **kwargs) for _ in range(n))) if n > 1 else m(*args, **kwargs)
         t = str(m)[8:-2].replace("__main__.", "")  # module type
         m_.np = sum(x.numel() for x in m_.parameters())  # number params
         m_.i, m_.f, m_.type = i, f, t  # attach index, 'from' index, type
