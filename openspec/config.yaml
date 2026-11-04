@@ -7,7 +7,7 @@ context: |
   项目是基于 Python、PyTorch、Ultralytics YOLO11 的电动自行车检测研究仓库。
   研究分为三部分：高密度拥堵场景 NMS-Free 检测；复杂遮挡下非线性时空跟踪；神经符号 AI 违章判定与证据留存。
   截至 2026-11-02，主要实现是第一部分；第二、三部分主要为设计文档，不能将框架自带跟踪器视为自研方案已完成。
-  第一阶段实现与验证记录见 STAGE1.md；训练/推理/评估入口为 train_ebike.py、inference_ebike.py、evaluate_model.py。
+  第一阶段实现与验证记录见 docs/detection/STAGE1.md；训练/推理/评估入口为 train_ebike.py、inference_ebike.py、evaluate_model.py。
   基础配置 yolo11-ebike.yaml；增强配置 yolo11-nms-free.yaml 含 DySample、SimAM，尚未接入 BiFPN。
   双分支采用 TaskAlignedAssigner 的 topk=10/1，不是全局二分匹配；不承诺任意遮挡下都能识别。
   开发机为 Windows PowerShell；后续真实数据训练在阿里云 Linux 虚拟机。未经用户另行要求，不在本机启动训练。
