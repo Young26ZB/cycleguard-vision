@@ -37,6 +37,8 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from ultralytics import YOLO
+from ultralytics.utils import YAML
+from ebike_diagnostics import load_manifest, rooted_image, score_diagnostics, sha256_file, validate_thresholds
 from train_ebike import get_data_config, resolve_data_config
 
 # Optional imports for plotting
@@ -78,6 +80,11 @@ def parse_args():
     parser.add_argument('--iou', type=float, default=0.6, help='IoU threshold for NMS')
     parser.add_argument('--device', type=str, default='', help='Device (cuda:0, cpu, etc.)')
     parser.add_argument('--split', type=str, default='val', choices=['val', 'test'], help='Dataset split')
+    parser.add_argument('--diagnostic-manifest', type=Path, help='Opt in to the reviewed-image diagnostic scorer')
+    parser.add_argument('--diagnostic-conf', type=float, default=0.25, help='Diagnostic confidence threshold')
+    parser.add_argument('--diagnostic-match-iou', type=float, default=0.50, help='Diagnostic target matching IoU')
+    parser.add_argument('--diagnostic-ignore-ioa', type=float, default=0.80, help='Diagnostic ignore-region IoA')
+    parser.add_argument('--diagnostic-max-det', type=int, default=300, help='Diagnostic inference detection limit')
     
     # Output settings
     parser.add_argument('--project', type=str, default='runs/evaluate', help='Output directory')
@@ -539,11 +546,87 @@ def evaluate_model(args):
     return metrics
 
 
+def evaluate_diagnostics(args):
+    """使用 YOLO 原生预测结果运行独立的诊断计分。"""
+    thresholds = {
+        "confidence": args.diagnostic_conf, "match_iou": args.diagnostic_match_iou,
+        "ignore_ioa": args.diagnostic_ignore_ioa,
+    }
+    validate_thresholds(**thresholds)
+    if args.diagnostic_max_det < 1 or args.imgsz < 1 or not 0 <= args.iou <= 1:
+        raise ValueError("诊断输入尺寸、候选数或 NMS IoU 无效")
+    weights = Path(args.weights).resolve()
+    if not weights.is_file():
+        raise FileNotFoundError(f"Weights file not found: {weights}")
+    weights_digest = sha256_file(weights)
+    manifest_digest = sha256_file(args.diagnostic_manifest)
+    if args.data_root:
+        root = Path(args.data_root).expanduser().resolve()
+    else:
+        data_config = Path(get_data_config(args.data)).resolve()
+        root = (data_config.parent / (YAML.load(data_config).get("path") or ".")).resolve()
+    manifest = load_manifest(args.diagnostic_manifest, root)
+    predictions, postprocess = {}, None
+    ready = [(name, row) for name, row in manifest["images"].items() if row["status"] == "ready"]
+    prefilter = args.diagnostic_conf / 2
+    if ready:
+        model = YOLO(str(weights))
+        classes = model.names
+        if not isinstance(classes, dict):
+            classes = dict(enumerate(classes))
+        ebike_classes = [key for key, value in classes.items() if str(value).casefold() == "ebike"]
+        if len(ebike_classes) != 1:
+            raise ValueError("权重必须包含唯一的 ebike 类别")
+        end2end = bool(getattr(model.model, "end2end", False))
+        postprocess = {"mode": "end2end" if end2end else "nms", "nms_iou": None if end2end else args.iou}
+        options = dict(
+            imgsz=args.imgsz, conf=prefilter, iou=args.iou, max_det=args.diagnostic_max_det,
+            save=False, verbose=False,
+        )
+        if args.device:
+            options["device"] = args.device
+        for name, row in ready:
+            result, = model.predict(str(rooted_image(root, name)), **options)
+            if tuple(result.orig_shape) != (row["height"], row["width"]):
+                raise ValueError(f"预测返回的原图尺寸与清单不一致 {name}")
+            boxes = result.boxes
+            predictions[name] = [
+                {"box": box, "confidence": confidence}
+                for box, confidence, cls in zip(boxes.xyxy.tolist(), boxes.conf.tolist(), boxes.cls.tolist())
+                if cls == ebike_classes[0]
+            ]
+    report = score_diagnostics(manifest, predictions, **thresholds)
+    report.update(
+        weights={"path": str(weights), "sha256": weights_digest},
+        manifest_sha256=manifest_digest,
+        inference={"imgsz": args.imgsz, "max_det": args.diagnostic_max_det,
+                   "prefilter_confidence": prefilter, "postprocess": postprocess},
+    )
+    output_dir = Path(args.project) / args.name
+    output_dir.mkdir(parents=True, exist_ok=False)
+    output = output_dir / "diagnostic-metrics.json"
+    with output.open("x", encoding="utf-8") as stream:
+        json.dump(report, stream, ensure_ascii=False, indent=2, allow_nan=False)
+        stream.write("\n")
+    print(f"诊断报告 {output}，计分 {report['scored_images']} 张，待复核 {report['pending_images']} 张。")
+    if report["training_overlap"]:
+        print("样本与训练集重叠，结果仅用于诊断。")
+    for key, label in (("precision", "精确率"), ("recall", "召回率"), ("duplicates", "重复检出"),
+                       ("localization_error_median", "定位偏差中位数")):
+        value = report[key]
+        display = "不适用" if value is None else f"{value:.4f}" if isinstance(value, float) else str(value)
+        print(f"{label} {display}")
+    return report
+
+
 def main():
     """Main entry point."""
     args = parse_args()
     
     try:
+        if args.diagnostic_manifest is not None:
+            evaluate_diagnostics(args)
+            return 0
         metrics = evaluate_model(args)
         
         print("\n" + "=" * 60)

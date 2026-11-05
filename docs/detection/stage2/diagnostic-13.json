@@ -1,0 +1,732 @@
+{
+  "schema_version": 1,
+  "dataset_version": "ebike-stage2-diagnostic-13-v1",
+  "images": {
+    "images/test/1217 (1).jpg": {
+      "width": 1920,
+      "height": 1080,
+      "sha256": "162ac2df438372434387b6eb82557800b291cc1df8f86907f3cfbfb36b0ad033",
+      "training_overlap": true,
+      "source_train": "images/train/1201 (41).jpg",
+      "lighting": "day",
+      "status": "pending",
+      "targets": [
+        {
+          "box": [
+            803,
+            481,
+            898,
+            665
+          ],
+          "occlusion": "none"
+        },
+        {
+          "box": [
+            994,
+            413,
+            1090,
+            572
+          ],
+          "occlusion": "none"
+        },
+        {
+          "box": [
+            1155,
+            396,
+            1253,
+            560
+          ],
+          "occlusion": "none"
+        }
+      ],
+      "ignore": [
+        [
+          1158,
+          206,
+          1252,
+          291
+        ],
+        [
+          1246,
+          290,
+          1380,
+          403
+        ],
+        [
+          1356,
+          372,
+          1525,
+          491
+        ]
+      ],
+      "review": [
+        {
+          "reason": "uncertain_class",
+          "location": "上缘道路中央",
+          "evidence": "只能看见远处车辆尾部，车型难以辨认",
+          "conclusion": null
+        },
+        {
+          "reason": "uncertain_bounds",
+          "location": "右下角出画目标",
+          "evidence": "可见骑行者及车把，车身可见线索不足以确定人车边界",
+          "conclusion": null
+        }
+      ]
+    },
+    "images/test/1217 (2).jpg": {
+      "width": 1920,
+      "height": 1080,
+      "sha256": "9a9972399a08654f16b0aec6cfb71f3ef412038d90ac8bca5ce11a67a4bb94ed",
+      "training_overlap": true,
+      "source_train": "images/train/1201 (164).jpg",
+      "lighting": "day",
+      "status": "ready",
+      "targets": [
+        {
+          "box": [
+            1105,
+            442,
+            1258,
+            712
+          ],
+          "occlusion": "none"
+        }
+      ],
+      "ignore": [
+        [
+          1232,
+          68,
+          1340,
+          184
+        ],
+        [
+          1355,
+          170,
+          1520,
+          304
+        ],
+        [
+          1367,
+          204,
+          1537,
+          336
+        ],
+        [
+          1537,
+          279,
+          1732,
+          428
+        ]
+      ],
+      "review": []
+    },
+    "images/test/1217 (3).jpg": {
+      "width": 1920,
+      "height": 1080,
+      "sha256": "abf696304a678224548983579e4b386014d0d27c4304783fd58c0f6690d4dce1",
+      "training_overlap": true,
+      "source_train": "images/train/1201 (165).jpg",
+      "lighting": "day",
+      "status": "ready",
+      "targets": [
+        {
+          "box": [
+            1004,
+            299,
+            1129,
+            520
+          ],
+          "occlusion": "none"
+        }
+      ],
+      "ignore": [
+        [
+          1231,
+          72,
+          1352,
+          188
+        ],
+        [
+          1353,
+          176,
+          1516,
+          308
+        ],
+        [
+          1367,
+          213,
+          1534,
+          340
+        ],
+        [
+          1535,
+          284,
+          1732,
+          438
+        ]
+      ],
+      "review": []
+    },
+    "images/test/1217 (4).jpg": {
+      "width": 1920,
+      "height": 1080,
+      "sha256": "1f11263748a65f39d602f64322222e25813f33ed3945820a41395c6b8ae0b6b9",
+      "training_overlap": true,
+      "source_train": "images/train/1201 (166).jpg",
+      "lighting": "day",
+      "status": "ready",
+      "targets": [
+        {
+          "box": [
+            906,
+            213,
+            1019,
+            402
+          ],
+          "occlusion": "none"
+        }
+      ],
+      "ignore": [
+        [
+          1228,
+          91,
+          1351,
+          207
+        ],
+        [
+          1347,
+          199,
+          1513,
+          327
+        ],
+        [
+          1360,
+          229,
+          1531,
+          362
+        ],
+        [
+          1527,
+          307,
+          1723,
+          462
+        ]
+      ],
+      "review": []
+    },
+    "images/test/1217 (5).jpg": {
+      "width": 1920,
+      "height": 1080,
+      "sha256": "4ae18bc055ae02379521d7d14c9777beb089d155b3645e357adb1bb9d7b6271c",
+      "training_overlap": true,
+      "source_train": "images/train/1201 (183).jpg",
+      "lighting": "day",
+      "status": "pending",
+      "targets": [
+        {
+          "box": [
+            933,
+            290,
+            1050,
+            467
+          ],
+          "occlusion": "partial"
+        },
+        {
+          "box": [
+            1081,
+            483,
+            1213,
+            731
+          ],
+          "occlusion": "none"
+        }
+      ],
+      "ignore": [
+        [
+          1239,
+          187,
+          1363,
+          309
+        ],
+        [
+          1359,
+          315,
+          1544,
+          462
+        ],
+        [
+          1511,
+          403,
+          1733,
+          570
+        ]
+      ],
+      "review": [
+        {
+          "reason": "uncertain_class",
+          "location": "图像下缘右侧",
+          "evidence": "只露出骑行者和车把，无法区分车型",
+          "conclusion": null
+        },
+        {
+          "reason": "uncertain_bounds",
+          "location": "图像下缘中央",
+          "evidence": "黄衣骑行者与蓝色箱体可见，车身已大部分出画，需核查当前帧能否可靠确定车体外沿",
+          "conclusion": null
+        }
+      ]
+    },
+    "images/test/1217 (6).jpg": {
+      "width": 1920,
+      "height": 1080,
+      "sha256": "0f8387321f76dd2a04e072565069b2f408ea62358e17a9b36253f2594b9c6f15",
+      "training_overlap": true,
+      "source_train": "images/train/1201 (184).jpg",
+      "lighting": "day",
+      "status": "pending",
+      "targets": [
+        {
+          "box": [
+            940,
+            242,
+            1038,
+            395
+          ],
+          "occlusion": "partial"
+        },
+        {
+          "box": [
+            981,
+            375,
+            1086,
+            581
+          ],
+          "occlusion": "none"
+        },
+        {
+          "box": [
+            892,
+            574,
+            1048,
+            847
+          ],
+          "occlusion": "none"
+        }
+      ],
+      "ignore": [
+        [
+          1243,
+          211,
+          1356,
+          329
+        ],
+        [
+          1364,
+          326,
+          1552,
+          480
+        ],
+        [
+          1517,
+          430,
+          1732,
+          580
+        ]
+      ],
+      "review": [
+        {
+          "reason": "uncertain_class",
+          "location": "远处上缘道路",
+          "evidence": "远处两轮目标尺寸很小，车型特征不足",
+          "conclusion": null
+        }
+      ]
+    },
+    "images/test/1217 (7).jpg": {
+      "width": 1920,
+      "height": 1080,
+      "sha256": "daf0eaad7720b00c930eb23bc549a463c276b4adc6e822256cecbc64f29db04e",
+      "training_overlap": true,
+      "source_train": "images/train/1201 (302).jpg",
+      "lighting": "day",
+      "status": "pending",
+      "targets": [
+        {
+          "box": [
+            990,
+            184,
+            1076,
+            348
+          ],
+          "occlusion": "none"
+        },
+        {
+          "box": [
+            1162,
+            370,
+            1300,
+            580
+          ],
+          "occlusion": "none"
+        }
+      ],
+      "ignore": [
+        [
+          1154,
+          193,
+          1287,
+          286
+        ],
+        [
+          1284,
+          284,
+          1458,
+          432
+        ],
+        [
+          1433,
+          378,
+          1639,
+          532
+        ]
+      ],
+      "review": [
+        {
+          "reason": "uncertain_ownership",
+          "location": "出租车右前方粉色和灰色头盔附近",
+          "evidence": "两车靠近且车身轮廓相叠，部分车身归属仍需核查",
+          "conclusion": null
+        }
+      ]
+    },
+    "images/test/1217 (8).jpg": {
+      "width": 1920,
+      "height": 1080,
+      "sha256": "381bc53da460f9eab176c04c3d10a82bcf635ee7baab7ac8830f39ed449c01e8",
+      "training_overlap": true,
+      "source_train": "images/train/1201 (303).jpg",
+      "lighting": "day",
+      "status": "pending",
+      "targets": [
+        {
+          "box": [
+            993,
+            142,
+            1078,
+            291
+          ],
+          "occlusion": "none"
+        },
+        {
+          "box": [
+            1124,
+            318,
+            1247,
+            510
+          ],
+          "occlusion": "none"
+        }
+      ],
+      "ignore": [
+        [
+          1171,
+          196,
+          1299,
+          291
+        ],
+        [
+          1294,
+          292,
+          1471,
+          436
+        ],
+        [
+          1441,
+          380,
+          1654,
+          541
+        ]
+      ],
+      "review": [
+        {
+          "reason": "uncertain_ownership",
+          "location": "出租车右前方两个相叠的骑行者",
+          "evidence": "粉色头盔目标的车身被灰色头盔骑行者及出租车遮挡，当前帧边界不明确",
+          "conclusion": null
+        }
+      ]
+    },
+    "images/test/1217 (9).jpg": {
+      "width": 1920,
+      "height": 1080,
+      "sha256": "76e2840aceaf737a0d58970fde80636378e1d0efea6ba08165c6b643905656d7",
+      "training_overlap": true,
+      "source_train": "images/train/1201 (304).jpg",
+      "lighting": "day",
+      "status": "pending",
+      "targets": [
+        {
+          "box": [
+            1034,
+            99,
+            1115,
+            237
+          ],
+          "occlusion": "none"
+        },
+        {
+          "box": [
+            1116,
+            270,
+            1228,
+            449
+          ],
+          "occlusion": "none"
+        }
+      ],
+      "ignore": [
+        [
+          1195,
+          179,
+          1313,
+          285
+        ],
+        [
+          1311,
+          277,
+          1498,
+          427
+        ],
+        [
+          1467,
+          375,
+          1683,
+          535
+        ]
+      ],
+      "review": [
+        {
+          "reason": "uncertain_bounds",
+          "location": "出租车右前方粉色头盔目标",
+          "evidence": "可跨相邻画面辨认目标，但此帧车身被前方骑行者和出租车遮挡，完整范围不可可靠确定",
+          "conclusion": null
+        }
+      ]
+    },
+    "images/test/1217 (10).jpg": {
+      "width": 1920,
+      "height": 1080,
+      "sha256": "70a967a76aaee0d2ff6c10276b1759ba6c2296d95ed603c8283cb1b9b9d0d214",
+      "training_overlap": true,
+      "source_train": "images/train/1129 (871).jpg",
+      "lighting": "night",
+      "status": "pending",
+      "targets": [
+        {
+          "box": [
+            1124,
+            618,
+            1222,
+            787
+          ],
+          "occlusion": "none"
+        },
+        {
+          "box": [
+            1198,
+            783,
+            1312,
+            987
+          ],
+          "occlusion": "none"
+        }
+      ],
+      "ignore": [
+        [
+          1157,
+          471,
+          1287,
+          551
+        ]
+      ],
+      "review": [
+        {
+          "reason": "uncertain_class",
+          "location": "远处道路中央及路口",
+          "evidence": "多处只见小型轮廓或车灯，不能可靠区分车型",
+          "conclusion": null
+        }
+      ]
+    },
+    "images/test/1217 (11).jpg": {
+      "width": 1920,
+      "height": 1080,
+      "sha256": "9c4c0d2453a7a12c3b211424ff6d331c4cd1cf2d990a4fc80d2a9a18885e6e51",
+      "training_overlap": true,
+      "source_train": "images/train/1129 (872).jpg",
+      "lighting": "night",
+      "status": "pending",
+      "targets": [
+        {
+          "box": [
+            1024,
+            496,
+            1109,
+            632
+          ],
+          "occlusion": "none"
+        },
+        {
+          "box": [
+            1095,
+            632,
+            1183,
+            796
+          ],
+          "occlusion": "none"
+        },
+        {
+          "box": [
+            1030,
+            788,
+            1148,
+            1019
+          ],
+          "occlusion": "none"
+        }
+      ],
+      "ignore": [
+        [
+          1162,
+          467,
+          1287,
+          552
+        ]
+      ],
+      "review": [
+        {
+          "reason": "uncertain_class",
+          "location": "远处道路中央及路口",
+          "evidence": "目标轮廓细小，车型证据不足",
+          "conclusion": null
+        }
+      ]
+    },
+    "images/test/1217 (12).jpg": {
+      "width": 1920,
+      "height": 1080,
+      "sha256": "c9dc4023eec4c5a175fb76eb92b9f4939b299b95f25fbfa3a6544abcf70024c0",
+      "training_overlap": true,
+      "source_train": "images/train/1129 (873).jpg",
+      "lighting": "night",
+      "status": "pending",
+      "targets": [
+        {
+          "box": [
+            976,
+            425,
+            1042,
+            532
+          ],
+          "occlusion": "none"
+        },
+        {
+          "box": [
+            1025,
+            533,
+            1099,
+            667
+          ],
+          "occlusion": "none"
+        },
+        {
+          "box": [
+            911,
+            577,
+            995,
+            724
+          ],
+          "occlusion": "none"
+        }
+      ],
+      "ignore": [
+        [
+          1162,
+          470,
+          1287,
+          553
+        ]
+      ],
+      "review": [
+        {
+          "reason": "uncertain_class",
+          "location": "路口远处目标",
+          "evidence": "远处目标以车灯和小型轮廓为主，车型待核对",
+          "conclusion": null
+        }
+      ]
+    },
+    "images/test/1217 (13).jpg": {
+      "width": 1920,
+      "height": 1080,
+      "sha256": "0138352fd9e57c74b5aecb9a4efc5069ce90d469c0f3aa3ded95d31f3c7cabd7",
+      "training_overlap": true,
+      "source_train": "images/train/1129 (874).jpg",
+      "lighting": "night",
+      "status": "pending",
+      "targets": [
+        {
+          "box": [
+            948,
+            377,
+            1012,
+            476
+          ],
+          "occlusion": "none"
+        },
+        {
+          "box": [
+            968,
+            469,
+            1033,
+            582
+          ],
+          "occlusion": "none"
+        },
+        {
+          "box": [
+            845,
+            459,
+            909,
+            577
+          ],
+          "occlusion": "none"
+        }
+      ],
+      "ignore": [
+        [
+          1163,
+          470,
+          1287,
+          553
+        ]
+      ],
+      "review": [
+        {
+          "reason": "uncertain_class",
+          "location": "远处路口",
+          "evidence": "远处目标仅见小型轮廓和灯光，无法确认车型",
+          "conclusion": null
+        },
+        {
+          "reason": "uncertain_ownership",
+          "location": "道路右侧中段深色和浅色骑行者",
+          "evidence": "两者前后遮挡，车身归属与可推断范围仍待核查",
+          "conclusion": null
+        }
+      ]
+    }
+  }
+}
