@@ -1,0 +1,564 @@
+{
+  "schema_version": 1,
+  "benchmark": "ebike_tracking_synthetic",
+  "scope": "tracking_core_only",
+  "device": "cpu",
+  "environment": {
+    "os": "Windows-10-10.0.19045-SP0",
+    "cpu": "Intel64 Family 6 Model 165 Stepping 2, GenuineIntel",
+    "logical_cpus": 12,
+    "python": "3.9.23",
+    "numpy": "2.0.2",
+    "scipy": "1.13.1",
+    "torch": "2.5.1",
+    "opencv": "4.12.0",
+    "torch_threads": 1,
+    "thread_environment": {
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": "1"
+    }
+  },
+  "tracker_config": {
+    "min_hits": 3,
+    "max_age": 15,
+    "max_tracks": 128,
+    "max_detections": 256,
+    "min_score": 0.25,
+    "new_track_score": 0.5,
+    "min_iou": 0.3
+  },
+  "profile": {
+    "frames": 240,
+    "warmup": 30,
+    "repeat": 3,
+    "target_fps": 30
+  },
+  "cases": {
+    "ordinary": {
+      "detections_per_frame": 12,
+      "spacing_px": 64,
+      "frame_size_px": [
+        788,
+        98
+      ],
+      "runs": [
+        {
+          "mode": "tracking_core_only",
+          "frames_processed": 270,
+          "warmup_frames": 30,
+          "measured_frames": 240,
+          "latency_samples": 240,
+          "sample_limit": 240,
+          "target_fps": 30,
+          "frame_period_ms": 33.333333333333336,
+          "suggested_tracking_budget_ms": 6.666666666666668,
+          "tracking_latency_ms": {
+            "p50": 0.4854000000000802,
+            "p95": 0.6629599999997902,
+            "p99": 0.8345409999999153
+          },
+          "end_to_end_latency_ms": null,
+          "tracking_throughput_fps": 1961.4685842200774,
+          "observed_throughput_fps": 1765.721172026854,
+          "tracking_over_frame_period": 0,
+          "missed_frame_deadlines": null,
+          "peak_schedule_backlog_frames": null,
+          "final_schedule_backlog_frames": null,
+          "final_start_lag_ms": null,
+          "dropped_frames": null,
+          "output": {
+            "per_frame_latency_ms": {
+              "p50": 0.00020000000011677344,
+              "p95": 0.00029999999995311555,
+              "p99": 0.00030000000039720476
+            },
+            "total_ms": 0.052199999997171176,
+            "final_flush_ms": 0.00029999999995311555,
+            "rendering_and_encoding": "disabled"
+          },
+          "peak_sampled_rss_bytes": 417665024,
+          "process_peak_rss_bytes": 417669120,
+          "workload_totals": {
+            "input_detections": 2880,
+            "association_candidates": 2880,
+            "truncated_candidates": 0,
+            "rejected_new_tracks": 0,
+            "live_tracks": 2880,
+            "association_rows": 2880,
+            "association_columns": 2880
+          },
+          "workload_peaks": {
+            "input_detections": 12,
+            "association_candidates": 12,
+            "truncated_candidates": 0,
+            "rejected_new_tracks": 0,
+            "live_tracks": 12,
+            "association_rows": 12,
+            "association_columns": 12
+          }
+        },
+        {
+          "mode": "tracking_core_only",
+          "frames_processed": 270,
+          "warmup_frames": 30,
+          "measured_frames": 240,
+          "latency_samples": 240,
+          "sample_limit": 240,
+          "target_fps": 30,
+          "frame_period_ms": 33.333333333333336,
+          "suggested_tracking_budget_ms": 6.666666666666668,
+          "tracking_latency_ms": {
+            "p50": 0.5138499999999269,
+            "p95": 0.776805000000169,
+            "p99": 0.8900099999999656
+          },
+          "end_to_end_latency_ms": null,
+          "tracking_throughput_fps": 1809.9329118201279,
+          "observed_throughput_fps": 1626.3258791138423,
+          "tracking_over_frame_period": 0,
+          "missed_frame_deadlines": null,
+          "peak_schedule_backlog_frames": null,
+          "final_schedule_backlog_frames": null,
+          "final_start_lag_ms": null,
+          "dropped_frames": null,
+          "output": {
+            "per_frame_latency_ms": {
+              "p50": 0.00020000000011677344,
+              "p95": 0.00029999999995311555,
+              "p99": 0.0003610000000264775
+            },
+            "total_ms": 0.05659999999974019,
+            "final_flush_ms": 0.00020000000011677344,
+            "rendering_and_encoding": "disabled"
+          },
+          "peak_sampled_rss_bytes": 417800192,
+          "process_peak_rss_bytes": 417804288,
+          "workload_totals": {
+            "input_detections": 2880,
+            "association_candidates": 2880,
+            "truncated_candidates": 0,
+            "rejected_new_tracks": 0,
+            "live_tracks": 2880,
+            "association_rows": 2880,
+            "association_columns": 2880
+          },
+          "workload_peaks": {
+            "input_detections": 12,
+            "association_candidates": 12,
+            "truncated_candidates": 0,
+            "rejected_new_tracks": 0,
+            "live_tracks": 12,
+            "association_rows": 12,
+            "association_columns": 12
+          }
+        },
+        {
+          "mode": "tracking_core_only",
+          "frames_processed": 270,
+          "warmup_frames": 30,
+          "measured_frames": 240,
+          "latency_samples": 240,
+          "sample_limit": 240,
+          "target_fps": 30,
+          "frame_period_ms": 33.333333333333336,
+          "suggested_tracking_budget_ms": 6.666666666666668,
+          "tracking_latency_ms": {
+            "p50": 0.5087499999998357,
+            "p95": 0.6617899999999731,
+            "p99": 0.7676550000000891
+          },
+          "end_to_end_latency_ms": null,
+          "tracking_throughput_fps": 1860.310811428835,
+          "observed_throughput_fps": 1669.4316628582797,
+          "tracking_over_frame_period": 0,
+          "missed_frame_deadlines": null,
+          "peak_schedule_backlog_frames": null,
+          "final_schedule_backlog_frames": null,
+          "final_start_lag_ms": null,
+          "dropped_frames": null,
+          "output": {
+            "per_frame_latency_ms": {
+              "p50": 0.00020000000011677344,
+              "p95": 0.00029999999997532,
+              "p99": 0.00030000000039720476
+            },
+            "total_ms": 0.05599999999983396,
+            "final_flush_ms": 0.00029999999995311555,
+            "rendering_and_encoding": "disabled"
+          },
+          "peak_sampled_rss_bytes": 417869824,
+          "process_peak_rss_bytes": 417873920,
+          "workload_totals": {
+            "input_detections": 2880,
+            "association_candidates": 2880,
+            "truncated_candidates": 0,
+            "rejected_new_tracks": 0,
+            "live_tracks": 2880,
+            "association_rows": 2880,
+            "association_columns": 2880
+          },
+          "workload_peaks": {
+            "input_detections": 12,
+            "association_candidates": 12,
+            "truncated_candidates": 0,
+            "rejected_new_tracks": 0,
+            "live_tracks": 12,
+            "association_rows": 12,
+            "association_columns": 12
+          }
+        }
+      ]
+    },
+    "dense": {
+      "detections_per_frame": 128,
+      "spacing_px": 12,
+      "frame_size_px": [
+        456,
+        134
+      ],
+      "runs": [
+        {
+          "mode": "tracking_core_only",
+          "frames_processed": 270,
+          "warmup_frames": 30,
+          "measured_frames": 240,
+          "latency_samples": 240,
+          "sample_limit": 240,
+          "target_fps": 30,
+          "frame_period_ms": 33.333333333333336,
+          "suggested_tracking_budget_ms": 6.666666666666668,
+          "tracking_latency_ms": {
+            "p50": 2.88810000000006,
+            "p95": 5.258640000000201,
+            "p99": 6.10764400000006
+          },
+          "end_to_end_latency_ms": null,
+          "tracking_throughput_fps": 298.5155938949098,
+          "observed_throughput_fps": 289.71749164527176,
+          "tracking_over_frame_period": 0,
+          "missed_frame_deadlines": null,
+          "peak_schedule_backlog_frames": null,
+          "final_schedule_backlog_frames": null,
+          "final_start_lag_ms": null,
+          "dropped_frames": null,
+          "output": {
+            "per_frame_latency_ms": {
+              "p50": 0.00029999999995311555,
+              "p95": 0.0005999999999062311,
+              "p99": 0.0008999999998593466
+            },
+            "total_ms": 0.07699999999477569,
+            "final_flush_ms": 0.00040000000023354687,
+            "rendering_and_encoding": "disabled"
+          },
+          "peak_sampled_rss_bytes": 419569664,
+          "process_peak_rss_bytes": 419573760,
+          "workload_totals": {
+            "input_detections": 30720,
+            "association_candidates": 30720,
+            "truncated_candidates": 0,
+            "rejected_new_tracks": 0,
+            "live_tracks": 30720,
+            "association_rows": 30720,
+            "association_columns": 30720
+          },
+          "workload_peaks": {
+            "input_detections": 128,
+            "association_candidates": 128,
+            "truncated_candidates": 0,
+            "rejected_new_tracks": 0,
+            "live_tracks": 128,
+            "association_rows": 128,
+            "association_columns": 128
+          }
+        },
+        {
+          "mode": "tracking_core_only",
+          "frames_processed": 270,
+          "warmup_frames": 30,
+          "measured_frames": 240,
+          "latency_samples": 240,
+          "sample_limit": 240,
+          "target_fps": 30,
+          "frame_period_ms": 33.333333333333336,
+          "suggested_tracking_budget_ms": 6.666666666666668,
+          "tracking_latency_ms": {
+            "p50": 2.2275999999998852,
+            "p95": 2.7858599999995177,
+            "p99": 3.0712230000004137
+          },
+          "end_to_end_latency_ms": null,
+          "tracking_throughput_fps": 429.7200857076695,
+          "observed_throughput_fps": 417.8531956367767,
+          "tracking_over_frame_period": 0,
+          "missed_frame_deadlines": null,
+          "peak_schedule_backlog_frames": null,
+          "final_schedule_backlog_frames": null,
+          "final_start_lag_ms": null,
+          "dropped_frames": null,
+          "output": {
+            "per_frame_latency_ms": {
+              "p50": 0.00020000000056086265,
+              "p95": 0.00029999999995311555,
+              "p99": 0.00030000000084129397
+            },
+            "total_ms": 0.06400000000983397,
+            "final_flush_ms": 0.00040000000023354687,
+            "rendering_and_encoding": "disabled"
+          },
+          "peak_sampled_rss_bytes": 419569664,
+          "process_peak_rss_bytes": 419573760,
+          "workload_totals": {
+            "input_detections": 30720,
+            "association_candidates": 30720,
+            "truncated_candidates": 0,
+            "rejected_new_tracks": 0,
+            "live_tracks": 30720,
+            "association_rows": 30720,
+            "association_columns": 30720
+          },
+          "workload_peaks": {
+            "input_detections": 128,
+            "association_candidates": 128,
+            "truncated_candidates": 0,
+            "rejected_new_tracks": 0,
+            "live_tracks": 128,
+            "association_rows": 128,
+            "association_columns": 128
+          }
+        },
+        {
+          "mode": "tracking_core_only",
+          "frames_processed": 270,
+          "warmup_frames": 30,
+          "measured_frames": 240,
+          "latency_samples": 240,
+          "sample_limit": 240,
+          "target_fps": 30,
+          "frame_period_ms": 33.333333333333336,
+          "suggested_tracking_budget_ms": 6.666666666666668,
+          "tracking_latency_ms": {
+            "p50": 2.2172999999998666,
+            "p95": 2.733680000000226,
+            "p99": 3.0197509999998213
+          },
+          "end_to_end_latency_ms": null,
+          "tracking_throughput_fps": 432.6819066849373,
+          "observed_throughput_fps": 420.6622275116605,
+          "tracking_over_frame_period": 0,
+          "missed_frame_deadlines": null,
+          "peak_schedule_backlog_frames": null,
+          "final_schedule_backlog_frames": null,
+          "final_start_lag_ms": null,
+          "dropped_frames": null,
+          "output": {
+            "per_frame_latency_ms": {
+              "p50": 0.00020000000056086265,
+              "p95": 0.00029999999995311555,
+              "p99": 0.00030000000084129397
+            },
+            "total_ms": 0.058600000007125175,
+            "final_flush_ms": 0.00029999999995311555,
+            "rendering_and_encoding": "disabled"
+          },
+          "peak_sampled_rss_bytes": 419569664,
+          "process_peak_rss_bytes": 419573760,
+          "workload_totals": {
+            "input_detections": 30720,
+            "association_candidates": 30720,
+            "truncated_candidates": 0,
+            "rejected_new_tracks": 0,
+            "live_tracks": 30720,
+            "association_rows": 30720,
+            "association_columns": 30720
+          },
+          "workload_peaks": {
+            "input_detections": 128,
+            "association_candidates": 128,
+            "truncated_candidates": 0,
+            "rejected_new_tracks": 0,
+            "live_tracks": 128,
+            "association_rows": 128,
+            "association_columns": 128
+          }
+        }
+      ]
+    },
+    "over_capacity": {
+      "detections_per_frame": 272,
+      "spacing_px": 12,
+      "frame_size_px": [
+        456,
+        194
+      ],
+      "runs": [
+        {
+          "mode": "tracking_core_only",
+          "frames_processed": 270,
+          "warmup_frames": 30,
+          "measured_frames": 240,
+          "latency_samples": 240,
+          "sample_limit": 240,
+          "target_fps": 30,
+          "frame_period_ms": 33.333333333333336,
+          "suggested_tracking_budget_ms": 6.666666666666668,
+          "tracking_latency_ms": {
+            "p50": 2.529699999999746,
+            "p95": 3.250200000000092,
+            "p99": 3.5436569999999175
+          },
+          "end_to_end_latency_ms": null,
+          "tracking_throughput_fps": 377.1295444699351,
+          "observed_throughput_fps": 366.4405779195427,
+          "tracking_over_frame_period": 0,
+          "missed_frame_deadlines": null,
+          "peak_schedule_backlog_frames": null,
+          "final_schedule_backlog_frames": null,
+          "final_start_lag_ms": null,
+          "dropped_frames": null,
+          "output": {
+            "per_frame_latency_ms": {
+              "p50": 0.00020000000056086265,
+              "p95": 0.00029999999995311555,
+              "p99": 0.00030000000084129397
+            },
+            "total_ms": 0.058499999994410246,
+            "final_flush_ms": 0.00040000000023354687,
+            "rendering_and_encoding": "disabled"
+          },
+          "peak_sampled_rss_bytes": 420454400,
+          "process_peak_rss_bytes": 420458496,
+          "workload_totals": {
+            "input_detections": 65280,
+            "association_candidates": 61440,
+            "truncated_candidates": 3840,
+            "rejected_new_tracks": 30720,
+            "live_tracks": 30720,
+            "association_rows": 30720,
+            "association_columns": 61440
+          },
+          "workload_peaks": {
+            "input_detections": 272,
+            "association_candidates": 256,
+            "truncated_candidates": 16,
+            "rejected_new_tracks": 128,
+            "live_tracks": 128,
+            "association_rows": 128,
+            "association_columns": 256
+          }
+        },
+        {
+          "mode": "tracking_core_only",
+          "frames_processed": 270,
+          "warmup_frames": 30,
+          "measured_frames": 240,
+          "latency_samples": 240,
+          "sample_limit": 240,
+          "target_fps": 30,
+          "frame_period_ms": 33.333333333333336,
+          "suggested_tracking_budget_ms": 6.666666666666668,
+          "tracking_latency_ms": {
+            "p50": 2.54304999999988,
+            "p95": 3.1201750000003687,
+            "p99": 3.656775999999958
+          },
+          "end_to_end_latency_ms": null,
+          "tracking_throughput_fps": 375.8450641364009,
+          "observed_throughput_fps": 365.2718962238189,
+          "tracking_over_frame_period": 0,
+          "missed_frame_deadlines": null,
+          "peak_schedule_backlog_frames": null,
+          "final_schedule_backlog_frames": null,
+          "final_start_lag_ms": null,
+          "dropped_frames": null,
+          "output": {
+            "per_frame_latency_ms": {
+              "p50": 0.00020000000056086265,
+              "p95": 0.00029999999999752447,
+              "p99": 0.0003610000004705667
+            },
+            "total_ms": 0.059200000007919584,
+            "final_flush_ms": 0.00030000000084129397,
+            "rendering_and_encoding": "disabled"
+          },
+          "peak_sampled_rss_bytes": 420462592,
+          "process_peak_rss_bytes": 420466688,
+          "workload_totals": {
+            "input_detections": 65280,
+            "association_candidates": 61440,
+            "truncated_candidates": 3840,
+            "rejected_new_tracks": 30720,
+            "live_tracks": 30720,
+            "association_rows": 30720,
+            "association_columns": 61440
+          },
+          "workload_peaks": {
+            "input_detections": 272,
+            "association_candidates": 256,
+            "truncated_candidates": 16,
+            "rejected_new_tracks": 128,
+            "live_tracks": 128,
+            "association_rows": 128,
+            "association_columns": 256
+          }
+        },
+        {
+          "mode": "tracking_core_only",
+          "frames_processed": 270,
+          "warmup_frames": 30,
+          "measured_frames": 240,
+          "latency_samples": 240,
+          "sample_limit": 240,
+          "target_fps": 30,
+          "frame_period_ms": 33.333333333333336,
+          "suggested_tracking_budget_ms": 6.666666666666668,
+          "tracking_latency_ms": {
+            "p50": 2.5391500000000455,
+            "p95": 3.170495000000083,
+            "p99": 3.5439990000000043
+          },
+          "end_to_end_latency_ms": null,
+          "tracking_throughput_fps": 376.1626953812546,
+          "observed_throughput_fps": 365.9683025703937,
+          "tracking_over_frame_period": 0,
+          "missed_frame_deadlines": null,
+          "peak_schedule_backlog_frames": null,
+          "final_schedule_backlog_frames": null,
+          "final_start_lag_ms": null,
+          "dropped_frames": null,
+          "output": {
+            "per_frame_latency_ms": {
+              "p50": 0.00020000000056086265,
+              "p95": 0.00029999999995311555,
+              "p99": 0.00036099999992877794
+            },
+            "total_ms": 0.06050000001067701,
+            "final_flush_ms": 0.00029999999995311555,
+            "rendering_and_encoding": "disabled"
+          },
+          "peak_sampled_rss_bytes": 420462592,
+          "process_peak_rss_bytes": 420466688,
+          "workload_totals": {
+            "input_detections": 65280,
+            "association_candidates": 61440,
+            "truncated_candidates": 3840,
+            "rejected_new_tracks": 30720,
+            "live_tracks": 30720,
+            "association_rows": 30720,
+            "association_columns": 61440
+          },
+          "workload_peaks": {
+            "input_detections": 272,
+            "association_candidates": 256,
+            "truncated_candidates": 16,
+            "rejected_new_tracks": 128,
+            "live_tracks": 128,
+            "association_rows": 128,
+            "association_columns": 256
+          }
+        }
+      ]
+    }
+  }
+}

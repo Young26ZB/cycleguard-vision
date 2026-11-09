@@ -130,8 +130,8 @@ class KalmanFilterXYAH:
         """Project state distribution to measurement space.
 
         Args:
-            mean (np.ndarray): The state's mean vector (8 dimensional array).
-            covariance (np.ndarray): The state's covariance matrix (8x8 dimensional).
+            mean (np.ndarray): State mean with shape (8,) or (N, 8).
+            covariance (np.ndarray): State covariance with shape (8, 8) or (N, 8, 8).
 
         Returns:
             mean (np.ndarray): Projected mean of the given state estimate.
@@ -143,17 +143,10 @@ class KalmanFilterXYAH:
             >>> covariance = np.eye(8)
             >>> projected_mean, projected_covariance = kf.project(mean, covariance)
         """
-        std = [
-            self._std_weight_position * mean[3],
-            self._std_weight_position * mean[3],
-            1e-1,
-            self._std_weight_position * mean[3],
-        ]
-        innovation_cov = np.diag(np.square(std))
-
-        mean = np.dot(self._update_mat, mean)
-        covariance = np.linalg.multi_dot((self._update_mat, covariance, self._update_mat.T))
-        return mean, covariance + innovation_cov
+        position_std = self._std_weight_position * mean[..., 3]
+        std = np.stack((position_std, position_std, np.full_like(position_std, 1e-1), position_std), axis=-1)
+        innovation_cov = np.square(std)[..., None, :] * np.eye(4)
+        return mean @ self._update_mat.T, self._update_mat @ covariance @ self._update_mat.T + innovation_cov
 
     def multi_predict(self, mean: np.ndarray, covariance: np.ndarray):
         """Run Kalman filter prediction step for multiple object states (Vectorized version).

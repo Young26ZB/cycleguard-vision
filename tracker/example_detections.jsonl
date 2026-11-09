@@ -1,0 +1,6 @@
+{"schema_version":1,"source_id":"synthetic-example","fps":25,"width":640,"height":480}
+{"frame_id":0,"timestamp_s":0.0,"detections":[[100,100,160,180,0.92,0]]}
+{"frame_id":1,"timestamp_s":0.04,"detections":[[101,100,161,180,0.91,0]]}
+{"frame_id":2,"timestamp_s":0.08,"detections":[[102,100,162,180,0.93,0]]}
+{"frame_id":3,"timestamp_s":0.12,"detections":[]}
+{"frame_id":4,"timestamp_s":0.16,"detections":[[104,100,164,180,0.90,0]]}
