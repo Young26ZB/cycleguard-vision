@@ -18,10 +18,15 @@ from .records import (
     FrameSequence,
     FrameStats,
     FrameTracks,
+    ReplayStats,
     TrackObservation,
     TrackPrediction,
     VideoSource,
 )
+from .replay import ORUConfig, ReplaySnapshot, replay_prediction
+
+
+_EMPTY_REPLAY_STATS = ReplayStats()
 
 
 @dataclass(frozen=True)
@@ -62,6 +67,7 @@ class _Track:
     last_frame: int
     motion: ObservationMotion | None = None
     last_box: np.ndarray | None = None
+    snapshot: ReplaySnapshot | None = None
 
 
 def _xyah_to_boxes(means: np.ndarray, image_limit: np.ndarray) -> np.ndarray:
@@ -113,12 +119,13 @@ class Tracker:
 
     def __init__(
         self, config: TrackingConfig | None = None, *, debug_predictions: bool = False,
-        ocm: OCMConfig | None = None, ocr: OCRConfig | None = None,
+        ocm: OCMConfig | None = None, ocr: OCRConfig | None = None, oru: ORUConfig | None = None,
     ) -> None:
         self.config = config if config is not None else TrackingConfig()
         self.debug_predictions = debug_predictions
         self.ocm = ocm
         self.ocr = ocr
+        self.oru = oru
         self._kalman = TrackingKalman()
         self._sequence = FrameSequence()
         self._tracks: dict[int, _Track] = {}
@@ -157,10 +164,50 @@ class Tracker:
             track.mean, track.covariance = mean, covariance
             track.hits += 1
             track.last_frame = frame_id
+            if self.oru is not None:
+                track.snapshot = ReplaySnapshot.capture(frame_id, measurement, mean, covariance)
             if track.motion is not None:
                 track.motion.observe(frame_id, *measurement[:2], self.ocm)
             if track.hits >= self.config.min_hits:
                 track.state = TrackState.ACTIVE
+
+    def _replay_matches(self, tracks: list[_Track], measurements: np.ndarray, frame_id: int) -> ReplayStats:
+        config = self.oru
+        requests = sorted(
+            (frame_id - track.last_frame - 1, track.track_id, index)
+            for index, track in enumerate(tracks)
+            if track.state is TrackState.LOST and frame_id - track.last_frame > 1
+        )
+        if not requests:
+            return _EMPTY_REPLAY_STATS
+
+        steps = replayed = track_limit = frame_limit = missing_snapshot = invalid = 0
+        for missing, _, index in requests:
+            track = tracks[index]
+            if missing > config.max_missing:
+                track_limit += 1
+                continue
+            snapshot = track.snapshot
+            if snapshot is None or snapshot.frame_id != track.last_frame:
+                missing_snapshot += 1
+                continue
+            if missing > config.max_steps - steps:
+                frame_limit += 1
+                continue
+            prior, attempted = replay_prediction(
+                self._kalman, snapshot, measurements[index], missing, config.noise_scale
+            )
+            steps += attempted
+            if prior is None:
+                invalid += 1
+            else:
+                track.mean, track.covariance = prior
+                replayed += 1
+        return ReplayStats(
+            oru_requests=len(requests), oru_replayed=replayed, oru_steps=steps, oru_track_limit=track_limit,
+            oru_frame_limit=frame_limit, oru_missing_snapshot=missing_snapshot, oru_invalid_state=invalid,
+            oru_fallbacks=len(requests) - replayed,
+        )
 
     def _recover(self, tracks, established, matches, available, candidates, frame_id, direction_tracks):
         """补一次剩余项的关联，原地登记成功的检测索引。"""
@@ -255,12 +302,16 @@ class Tracker:
             association = AssociationStats(direction_tracks)
         recovered = set(recovered) if len(recovered) else ()
 
+        replay = _EMPTY_REPLAY_STATS if self.oru is not None else None
         matched = matched_candidates >= 0
         if matched.any():
             track_indexes = np.flatnonzero(matched)
             matched_tracks = [tracks[i] for i in track_indexes]
             candidate_indexes = matched_candidates[track_indexes]
-            self._observe(matched_tracks, measurements[candidate_indexes], frame.frame_id)
+            matched_measurements = measurements[candidate_indexes]
+            if self.oru is not None:
+                replay = self._replay_matches(matched_tracks, matched_measurements, frame.frame_id)
+            self._observe(matched_tracks, matched_measurements, frame.frame_id)
             for index, track, i in zip(track_indexes, matched_tracks, candidate_indexes):
                 if self.ocr is not None:
                     track.last_box = candidates[i, :4].copy()
@@ -292,6 +343,8 @@ class Tracker:
             state = TrackState.ACTIVE if config.min_hits == 1 else TrackState.TENTATIVE
             mean, covariance = self._kalman.initiate(measurements[candidate_idx])
             track = _Track(self._next_id, int(row[5]), state, mean, covariance, 1, frame.frame_id)
+            if self.oru is not None:
+                track.snapshot = ReplaySnapshot.capture(frame.frame_id, measurements[candidate_idx], mean, covariance)
             if self.ocm is not None:
                 track.motion = ObservationMotion(self.ocm)
                 track.motion.observe(frame.frame_id, *measurements[candidate_idx, :2], self.ocm)
@@ -309,6 +362,7 @@ class Tracker:
                        max_rows, max_columns),
             tuple(predicted),
             association,
+            replay,
         )
 
     @staticmethod

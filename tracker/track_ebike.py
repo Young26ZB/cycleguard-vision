@@ -11,6 +11,7 @@ from pathlib import Path
 from time import perf_counter
 
 from .records import read_cache
+from .replay import ORUConfig
 
 
 def write_json(stream, record: dict) -> None:
@@ -73,6 +74,10 @@ def main(argv=None) -> int:
     parser.add_argument("--ocr-min-iou", type=float, default=0.3)
     parser.add_argument("--ocr-max-tracks", type=int, default=64)
     parser.add_argument("--ocr-max-detections", type=int, default=128)
+    parser.add_argument("--oru", action="store_true", help="重关联后回放遮挡区间的滤波状态")
+    parser.add_argument("--oru-max-missing", type=int, default=ORUConfig.max_missing, help="单轨最大缺帧数")
+    parser.add_argument("--oru-max-steps", type=int, default=ORUConfig.max_steps, help="整帧最大虚拟更新尝试步数")
+    parser.add_argument("--oru-noise-scale", type=float, default=ORUConfig.noise_scale, help="虚拟观测协方差倍率")
     args = parser.parse_args(argv)
     if args.video is not None and args.weights is None:
         parser.error("--video 需要 --weights")
@@ -98,7 +103,8 @@ def main(argv=None) -> int:
             max_age=args.ocr_max_age, min_iou=args.ocr_min_iou,
             max_tracks=args.ocr_max_tracks, max_detections=args.ocr_max_detections,
         ) if args.ocr else None
-        tracker = Tracker(config, debug_predictions=args.debug_predictions, ocm=ocm, ocr=ocr)
+        oru = ORUConfig(args.oru_max_missing, args.oru_max_steps, args.oru_noise_scale) if args.oru else None
+        tracker = Tracker(config, debug_predictions=args.debug_predictions, ocm=ocm, ocr=ocr, oru=oru)
         outputs = [path.resolve() for path in (args.output, args.save_cache, args.report) if path is not None]
         if len(set(outputs)) != len(outputs):
             raise ValueError("轨迹、检测缓存和报告需使用不同的输出路径")
@@ -139,6 +145,8 @@ def main(argv=None) -> int:
                         "ocm": asdict(ocm) if ocm is not None else None,
                         "ocr": asdict(ocr) if ocr is not None else None,
                     }
+                if oru is not None:
+                    report["oru_config"] = asdict(oru)
                 write_json(report_output, report)
     except (ValueError, OSError) as exc:
         parser.exit(2, f"跟踪失败：{exc}\n")

@@ -107,22 +107,13 @@ class KalmanFilterXYAH:
             >>> covariance = np.eye(8)
             >>> predicted_mean, predicted_covariance = kf.predict(mean, covariance)
         """
-        std_pos = [
-            self._std_weight_position * mean[3],
-            self._std_weight_position * mean[3],
-            1e-2,
-            self._std_weight_position * mean[3],
-        ]
-        std_vel = [
-            self._std_weight_velocity * mean[3],
-            self._std_weight_velocity * mean[3],
-            1e-5,
-            self._std_weight_velocity * mean[3],
-        ]
-        motion_cov = np.diag(np.square(np.r_[std_pos, std_vel]))
+        position_std = self._std_weight_position * mean[3]
+        velocity_std = self._std_weight_velocity * mean[3]
+        std = (position_std, position_std, 1e-2, position_std, velocity_std, velocity_std, 1e-5, velocity_std)
+        motion_cov = np.diag(np.square(std))
 
-        mean = np.dot(mean, self._motion_mat.T)
-        covariance = np.linalg.multi_dot((self._motion_mat, covariance, self._motion_mat.T)) + motion_cov
+        mean = self._motion_mat @ mean
+        covariance = self._motion_mat @ covariance @ self._motion_mat.T + motion_cov
 
         return mean, covariance
 
@@ -143,10 +134,15 @@ class KalmanFilterXYAH:
             >>> covariance = np.eye(8)
             >>> projected_mean, projected_covariance = kf.project(mean, covariance)
         """
-        position_std = self._std_weight_position * mean[..., 3]
-        std = np.stack((position_std, position_std, np.full_like(position_std, 1e-1), position_std), axis=-1)
-        innovation_cov = np.square(std)[..., None, :] * np.eye(4)
+        innovation_cov = self._measurement_variances(mean)[..., None, :] * np.eye(4)
         return mean @ self._update_mat.T, self._update_mat @ covariance @ self._update_mat.T + innovation_cov
+
+    def _measurement_variances(self, mean: np.ndarray) -> np.ndarray:
+        position_std = self._std_weight_position * mean[..., 3]
+        if mean.ndim == 1:
+            return np.square((position_std, position_std, 1e-1, position_std))
+        std = np.stack((position_std, position_std, np.full_like(position_std, 1e-1), position_std), axis=-1)
+        return np.square(std)
 
     def multi_predict(self, mean: np.ndarray, covariance: np.ndarray):
         """Run Kalman filter prediction step for multiple object states (Vectorized version).

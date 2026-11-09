@@ -11,7 +11,8 @@ import numpy as np
 
 from .association import OCMConfig, OCRConfig
 from .core import Tracker, TrackingConfig
-from .records import FrameDetections, VideoSource
+from .records import FrameDetections, ReplayStats, VideoSource
+from .replay import ORUConfig
 from .timing import StreamProfile, _latency_ms, environment
 from .track_ebike import write_tracks
 
@@ -81,11 +82,13 @@ def benchmark(config: TrackingConfig, frames: int, warmup: int, repeat: int, fps
     }
 
 
-class _AssociationProfile(StreamProfile):
+class _ReappearanceProfile(StreamProfile):
     def __init__(self, warmup, sample_limit, fps, occlusion_period):
         super().__init__(warmup, sample_limit, target_fps=fps)
         self.occlusion_period = occlusion_period
         self.reappearance_samples = []
+        self.reappearance_replay_steps = 0
+        self.reappearance_replay_fallbacks = 0
 
     def observe(self, fps, result, timing, core_start, ready, written):
         super().observe(fps, result, timing, core_start, ready, written)
@@ -95,6 +98,9 @@ class _AssociationProfile(StreamProfile):
             and result.frame_id % self.occlusion_period == _REAPPEARANCE
         ):
             self.reappearance_samples.append(ready - core_start)
+            if result.replay is not None:
+                self.reappearance_replay_steps += result.replay.oru_steps
+                self.reappearance_replay_fallbacks += result.replay.oru_fallbacks
 
     def report(self):
         report = super().report()
@@ -129,7 +135,7 @@ def association_benchmark(config: TrackingConfig, frames: int, warmup: int, repe
             # 轮换起始配置，减少运行顺序对尾延迟的影响。
             offset = run % len(profiles)
             for mode, momentum, recovery in profiles[offset:] + profiles[:offset]:
-                profile = _AssociationProfile(warmup, frames, fps, period)
+                profile = _ReappearanceProfile(warmup, frames, fps, period)
                 tracker = Tracker(config, ocm=momentum, ocr=recovery)
                 inputs = _synthetic_frames(name, detections, spacing, warmup + frames, fps, occlusion_period=period)
                 write_tracks(inputs, tracker, None, profile=profile)
@@ -159,6 +165,49 @@ def association_benchmark(config: TrackingConfig, frames: int, warmup: int, repe
     }
 
 
+def oru_benchmark(
+    config: TrackingConfig, frames: int, warmup: int, repeat: int, fps: float, replay: ORUConfig
+) -> dict:
+    """用同一批同步重现帧对比 ORU 的开销和预算回退。"""
+    momentum, recovery = OCMConfig(mode="adaptive"), OCRConfig()
+    profiles = (("off", None), ("on", replay))
+    detections = min(config.max_tracks, config.max_detections)
+    period = _LAST_VISIBLE + config.max_age + 1
+    runs = {"off": [], "on": []}
+    replay_keys = vars(ReplayStats())
+    for run in range(repeat):
+        ordered = profiles if run % 2 == 0 else profiles[::-1]
+        for mode, replay_config in ordered:
+            tracker = Tracker(config, ocm=momentum, ocr=recovery, oru=replay_config)
+            inputs = _synthetic_frames("oru_dense_misses", detections, 12, warmup + frames, fps, occlusion_period=period)
+            profile = _ReappearanceProfile(warmup, frames, fps, period)
+            write_tracks(inputs, tracker, None, profile=profile)
+            report = profile.report()
+            for field in ("workload_totals", "workload_peaks"):
+                for key in replay_keys:
+                    report[field].setdefault(key, 0)
+            report["reappearance_replay_steps"] = profile.reappearance_replay_steps
+            report["reappearance_replay_fallbacks"] = profile.reappearance_replay_fallbacks
+            runs[mode].append(report)
+    return {
+        "schema_version": 1,
+        "benchmark": "occlusion_filter_replay",
+        "scope": "tracking_core_only",
+        "device": "cpu",
+        "environment": environment(),
+        "tracker_config": asdict(config),
+        "association_config": {"ocm": asdict(momentum), "ocr": asdict(recovery)},
+        "oru_config": asdict(replay),
+        "sampling": {
+            "frames": frames, "warmup": warmup, "repeat": repeat, "target_fps": fps,
+            "occlusion_period": period, "reappearance_phase": _REAPPEARANCE,
+            "detections_per_visible_frame": detections,
+            "frame_size_px": [tracker.source.width, tracker.source.height],
+        },
+        "runs": runs,
+    }
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description="生成跟踪核心的可复现合成基准")
     parser.add_argument("--output", type=Path, required=True, help="新建基准 JSON")
@@ -168,14 +217,23 @@ def main(argv=None) -> int:
     parser.add_argument("--target-fps", type=float, default=30)
     parser.add_argument("--max-tracks", type=int, default=TrackingConfig.max_tracks)
     parser.add_argument("--max-detections", type=int, default=TrackingConfig.max_detections)
-    parser.add_argument("--association", action="store_true", help="对比 OCM/OCR 开关与密集遮挡重现")
+    modes = parser.add_mutually_exclusive_group()
+    modes.add_argument("--association", action="store_true", help="对比 OCM/OCR 开关与密集遮挡重现")
+    modes.add_argument("--oru", action="store_true", help="对比同步重现场景的 ORU 开关")
+    parser.add_argument("--oru-max-missing", type=int, default=ORUConfig.max_missing)
+    parser.add_argument("--oru-max-steps", type=int, default=ORUConfig.max_steps)
+    parser.add_argument("--oru-noise-scale", type=float, default=ORUConfig.noise_scale)
     args = parser.parse_args(argv)
     if args.repeat < 1:
         parser.error("--repeat 必须为正")
     try:
         config = TrackingConfig(max_tracks=args.max_tracks, max_detections=args.max_detections)
-        measure = association_benchmark if args.association else benchmark
-        report = measure(config, args.frames, args.warmup, args.repeat, args.target_fps)
+        sampling = (config, args.frames, args.warmup, args.repeat, args.target_fps)
+        if args.oru:
+            report = oru_benchmark(*sampling, ORUConfig(args.oru_max_missing, args.oru_max_steps, args.oru_noise_scale))
+        else:
+            measure = association_benchmark if args.association else benchmark
+            report = measure(*sampling)
         with args.output.open("x", encoding="utf-8") as output:
             json.dump(report, output, ensure_ascii=False, indent=2, allow_nan=False)
             output.write("\n")

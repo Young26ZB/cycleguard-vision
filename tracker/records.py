@@ -166,6 +166,18 @@ class AssociationStats:
 
 
 @dataclass(frozen=True)
+class ReplayStats:
+    oru_requests: int = 0
+    oru_replayed: int = 0
+    oru_steps: int = 0
+    oru_track_limit: int = 0
+    oru_frame_limit: int = 0
+    oru_missing_snapshot: int = 0
+    oru_invalid_state: int = 0
+    oru_fallbacks: int = 0
+
+
+@dataclass(frozen=True)
 class FrameTracks:
     source_id: str
     frame_id: int
@@ -174,6 +186,7 @@ class FrameTracks:
     stats: FrameStats
     predictions: tuple[TrackPrediction, ...] = ()
     association: AssociationStats | None = None
+    replay: ReplayStats | None = None
 
     def output_record(self) -> dict:
         tracks = [vars(track).copy() for track in self.tracks]
@@ -191,4 +204,6 @@ class FrameTracks:
             record["predictions"] = [vars(prediction).copy() for prediction in self.predictions]
         if self.association is not None:
             record["association"] = vars(self.association).copy()
+        if self.replay is not None:
+            record["oru"] = vars(self.replay).copy()
         return record

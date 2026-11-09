@@ -122,7 +122,8 @@ class StreamProfile:
             if self.paced:
                 self._end_to_end.append(ready - arrival)
         association = vars(result.association).items() if result.association is not None else ()
-        for key, value in chain(vars(result.stats).items(), association):
+        replay = vars(result.replay).items() if result.replay is not None else ()
+        for key, value in chain(vars(result.stats).items(), association, replay):
             self._totals[key] = self._totals.get(key, 0) + value
             self._peaks[key] = max(self._peaks.get(key, 0), value)
         if self._count % 32 == 1:

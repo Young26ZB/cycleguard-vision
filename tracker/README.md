@@ -35,11 +35,26 @@ OCM 和 OCR 默认均关闭，输出保持主链路格式。启用任一项后�
 
 方向一致性与最近观测恢复参考 [OC-SORT](https://arxiv.org/html/2203.14360)。本实现保留主链路的 XYAH 滤波和一对一关联。
 
+## 遮挡滤波回放
+
+```powershell
+python -m tracker.track_ebike --cache tracker/example_detections.jsonl --ocr --oru --output replayed.jsonl
+```
+
+ORU 默认关闭，可与主关联或 OCR 搭配。每条轨迹保留一个最近真实观测及其更新后的滤波快照。丢失轨迹重新匹配后，从快照逐帧回放遮挡区间的 XYAH 线性插值，再使用现有批量更新融合重现帧的真实检测。虚拟观测用于滤波状态修复，已发布的结果和真实观测历史保持原样。
+
+- `--oru-max-missing` 默认 6，限制单轨可回放的缺失帧数。
+- `--oru-max-steps` 默认 16，限制整帧的虚拟更新尝试步数。先处理缺失帧较少的轨迹，同长度按轨迹 ID 排序。以每轨缺失 4 帧为例，默认预算最多回放 4 条轨迹。
+- `--oru-noise-scale` 默认 4.0。虚拟观测使用放大后的基础观测协方差，每维方差有正下限，独立于检测置信度。
+
+预算不足、快照缺失或回放状态无效时，沿用普通预测和已匹配的 ID，当帧完成真实更新。失败时已尝试的步骤计入预算。开启后的帧级 `oru` 记录请求、成功、尝试步数及各类回退。
+
 ## 性能测量
 
 ```powershell
 python -m tracker.benchmark --output tracking-benchmark.json
 python -m tracker.benchmark --association --frames 270 --warmup 27 --repeat 3 --output association-benchmark.json
+python -m tracker.benchmark --oru --frames 270 --warmup 27 --repeat 3 --output oru-benchmark.json
 python -m tracker.track_ebike --video input.mp4 --weights best.pt --device 0 --output measured-tracks.jsonl --report measured-video.json --warmup 30 --target-fps 30
 ```
 
@@ -51,11 +66,14 @@ python -m tracker.track_ebike --video input.mp4 --weights best.pt --device 0 --o
 
 在[关联消融报告](local_association_baseline.json)中，六种配置使用相同的合成检测序列，单列首次重现帧的 P95/P99 和 OCR 工作量。128 目标的持续密集场景中，关闭增强、固定 OCM 加 OCR、自适应 OCM 加 OCR 的跟踪 P95 中位数分别为 3.03 ms、4.07 ms 和 4.34 ms。重现序列中 OCR 处理的最大真实候选矩阵为 64 × 128。
 
+[ORU 消融报告](local_oru_baseline.json)在相同的 128 目标合成检测序列和 OCM/OCR 配置下对比开关。三次运行中，全序列 P95 中位数从 3.74 ms 变为 4.91 ms，重现帧 P95 中位数从 2.89 ms 变为 5.55 ms。默认预算下，每次运行的 1280 个请求有 70 个完成回放，1210 个因整帧预算走普通更新。可使用 `--oru-max-steps` 复测其他预算。
+
 ## 本地非训练检查
 
 ```powershell
 python -m unittest tests.test_ebike_tracking -v
 python -m unittest tests.test_observation_association -v
+python -m unittest tests.test_occlusion_filter_replay -v
 ```
 
 本地验证使用 Python 3.9 与 PyTorch 2.5.1 CPU。17 项跟踪合成检查和 7 项第一阶段合成回归通过。另用 4 帧合成视频及未训练的端到端权重完成视频入口、检测缓存回放和按帧节奏计时的联调，直接推理和缓存回放的轨迹文件逐字节一致。
