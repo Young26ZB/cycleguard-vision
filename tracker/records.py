@@ -2,12 +2,22 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 from dataclasses import asdict, dataclass
 from math import isfinite
+from pathlib import Path
 from typing import Iterator, TextIO
 
 import numpy as np
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 @dataclass(frozen=True)
@@ -178,6 +188,12 @@ class ReplayStats:
 
 
 @dataclass(frozen=True)
+class NSAStats:
+    nsa_fallbacks: int = 0
+    nsa_failed_updates: int = 0
+
+
+@dataclass(frozen=True)
 class FrameTracks:
     source_id: str
     frame_id: int
@@ -187,6 +203,8 @@ class FrameTracks:
     predictions: tuple[TrackPrediction, ...] = ()
     association: AssociationStats | None = None
     replay: ReplayStats | None = None
+    nsa: NSAStats | None = None
+    real_updates: int = 0
 
     def output_record(self) -> dict:
         tracks = [vars(track).copy() for track in self.tracks]
@@ -206,4 +224,6 @@ class FrameTracks:
             record["association"] = vars(self.association).copy()
         if self.replay is not None:
             record["oru"] = vars(self.replay).copy()
+        if self.nsa is not None:
+            record["nsa"] = {"real_updates": self.real_updates, **vars(self.nsa)}
         return record

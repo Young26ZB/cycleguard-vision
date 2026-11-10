@@ -19,7 +19,7 @@ from .records import FrameTracks
 def environment() -> dict:
     torch = sys.modules.get("torch")
     cv2 = sys.modules.get("cv2")
-    return {
+    info = {
         "os": platform.platform(),
         "cpu": platform.processor() or platform.machine(),
         "logical_cpus": os.cpu_count(),
@@ -34,6 +34,10 @@ def environment() -> dict:
             for key in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS")
         },
     }
+    if torch is not None and torch.cuda.is_initialized():
+        info["cuda_runtime"] = torch.version.cuda
+        info["cuda_devices"] = [torch.cuda.get_device_name(index) for index in range(torch.cuda.device_count())]
+    return info
 
 
 def _latency_ms(samples: list[float]) -> dict | None:
@@ -123,7 +127,8 @@ class StreamProfile:
                 self._end_to_end.append(ready - arrival)
         association = vars(result.association).items() if result.association is not None else ()
         replay = vars(result.replay).items() if result.replay is not None else ()
-        for key, value in chain(vars(result.stats).items(), association, replay):
+        nsa = vars(result.nsa).items() if result.nsa is not None else ()
+        for key, value in chain(vars(result.stats).items(), association, replay, nsa, (("real_updates", result.real_updates),)):
             self._totals[key] = self._totals.get(key, 0) + value
             self._peaks[key] = max(self._peaks.get(key, 0), value)
         if self._count % 32 == 1:

@@ -10,7 +10,8 @@ from itertools import count
 from pathlib import Path
 from time import perf_counter
 
-from .records import read_cache
+from .nsa import NSAConfig
+from .records import read_cache, sha256_file
 from .replay import ORUConfig
 
 
@@ -78,6 +79,8 @@ def main(argv=None) -> int:
     parser.add_argument("--oru-max-missing", type=int, default=ORUConfig.max_missing, help="单轨最大缺帧数")
     parser.add_argument("--oru-max-steps", type=int, default=ORUConfig.max_steps, help="整帧最大虚拟更新尝试步数")
     parser.add_argument("--oru-noise-scale", type=float, default=ORUConfig.noise_scale, help="虚拟观测协方差倍率")
+    parser.add_argument("--nsa", action="store_true", help="按真实检测置信度缩放观测协方差")
+    parser.add_argument("--nsa-min-scale", type=float, default=NSAConfig.min_scale, help="NSA 的最小噪声倍率")
     args = parser.parse_args(argv)
     if args.video is not None and args.weights is None:
         parser.error("--video 需要 --weights")
@@ -104,16 +107,20 @@ def main(argv=None) -> int:
             max_tracks=args.ocr_max_tracks, max_detections=args.ocr_max_detections,
         ) if args.ocr else None
         oru = ORUConfig(args.oru_max_missing, args.oru_max_steps, args.oru_noise_scale) if args.oru else None
-        tracker = Tracker(config, debug_predictions=args.debug_predictions, ocm=ocm, ocr=ocr, oru=oru)
+        nsa = NSAConfig(args.nsa_min_scale) if args.nsa else None
+        tracker = Tracker(config, debug_predictions=args.debug_predictions, ocm=ocm, ocr=ocr, oru=oru, nsa=nsa)
         outputs = [path.resolve() for path in (args.output, args.save_cache, args.report) if path is not None]
         if len(set(outputs)) != len(outputs):
             raise ValueError("轨迹、检测缓存和报告需使用不同的输出路径")
         profile = None
+        weights_sha256 = None
         if args.report is not None:
             from .timing import StreamProfile, environment
 
             profile = StreamProfile(args.warmup, args.profile_frames, paced=args.video is not None,
                                     target_fps=args.target_fps)
+            if args.weights is not None:
+                weights_sha256 = sha256_file(args.weights)
         with ExitStack() as stack:
             if args.cache is not None:
                 stream = stack.enter_context(args.cache.open(encoding="utf-8-sig"))
@@ -140,6 +147,8 @@ def main(argv=None) -> int:
                     weights=str(args.weights) if args.weights is not None else None,
                     device_argument=args.device or ("auto" if args.video is not None else None),
                 )
+                if weights_sha256 is not None:
+                    report["weights_sha256"] = weights_sha256
                 if ocm is not None or ocr is not None:
                     report["association_config"] = {
                         "ocm": asdict(ocm) if ocm is not None else None,
@@ -147,6 +156,8 @@ def main(argv=None) -> int:
                     }
                 if oru is not None:
                     report["oru_config"] = asdict(oru)
+                if nsa is not None:
+                    report["nsa_config"] = asdict(nsa)
                 write_json(report_output, report)
     except (ValueError, OSError) as exc:
         parser.exit(2, f"跟踪失败：{exc}\n")

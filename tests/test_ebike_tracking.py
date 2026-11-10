@@ -213,7 +213,7 @@ class TrackingTests(unittest.TestCase):
         capture, detector = self.mock_video([120.0, 160.0, 200.0])
         with patch("cv2.VideoCapture", return_value=capture), patch("tracker.video.load_detector", return_value=detector):
             self.assertEqual(main([
-                "--video", str(EXAMPLE), "--weights", "unused.pt", "--output", str(output),
+                "--video", str(EXAMPLE), "--weights", str(EXAMPLE), "--output", str(output),
                 "--save-cache", str(cache), "--report", str(report), "--profile-frames", "2",
             ]), 0)
         capture.release.assert_called_once()
@@ -222,6 +222,7 @@ class TrackingTests(unittest.TestCase):
         self.assertEqual(output.read_bytes(), replay.read_bytes())
         stats = json.loads(report.read_text(encoding="utf-8"))
         self.assertEqual(stats["mode"], "paced_video")
+        self.assertEqual(len(stats["weights_sha256"]), 64)
         self.assertEqual(stats["frames_processed"], 3)
         self.assertEqual(stats["latency_samples"], 2)
         self.assertGreaterEqual(stats["end_to_end_latency_ms"]["p95"], stats["tracking_latency_ms"]["p95"])

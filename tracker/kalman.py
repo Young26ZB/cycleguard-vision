@@ -12,10 +12,18 @@ _MEASUREMENT_DIAGONAL = np.diag_indices(4)
 
 class TrackingKalman(KalmanFilterXYAH):
     def update_batch(
-        self, means: np.ndarray, covariances: np.ndarray, measurements: np.ndarray
+        self, means: np.ndarray, covariances: np.ndarray, measurements: np.ndarray, *,
+        noise_scale: np.ndarray | None = None,
     ) -> tuple[np.ndarray, np.ndarray]:
         """批量融合各轨迹已匹配的观测，返回校正后的均值和协方差。"""
-        projected, innovation = self.project(means, covariances)
+        if noise_scale is None:
+            projected, innovation = self.project(means, covariances)
+        else:
+            projected = means[:, :4]
+            innovation = covariances[:, :4, :4].copy()
+            noise = np.maximum(self._measurement_variances(means) * noise_scale[:, None], 1e-12)
+            rows, columns = _MEASUREMENT_DIAGONAL
+            innovation[:, rows, columns] += noise
         return self._correct(means, covariances, measurements, projected, innovation)
 
     def update_virtual(

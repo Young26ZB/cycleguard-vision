@@ -11,7 +11,9 @@ import numpy as np
 
 from .association import OCMConfig, OCRConfig
 from .core import Tracker, TrackingConfig
-from .records import FrameDetections, ReplayStats, VideoSource
+from .nsa import NSAConfig
+from .profiles import ablation_profiles
+from .records import FrameDetections, NSAStats, ReplayStats, VideoSource
 from .replay import ORUConfig
 from .timing import StreamProfile, _latency_ms, environment
 from .track_ebike import write_tracks
@@ -23,7 +25,8 @@ _LAST_VISIBLE = 11
 
 
 def _synthetic_frames(
-    name: str, detections: int, spacing: int, count: int, fps: float, *, occlusion_period: int | None = None
+    name: str, detections: int, spacing: int, count: int, fps: float, *,
+    occlusion_period: int | None = None, vary_scores: bool = False,
 ):
     indexes = np.arange(detections)
     boxes = np.empty((detections, 6), dtype=np.float64)
@@ -45,6 +48,8 @@ def _synthetic_frames(
                 rows[:, (1, 3)] += min(phase, _MOTION_END) * 16
             else:
                 rows[:, (0, 2)] += index % 6
+            if vary_scores:
+                rows[:, 4] = 0.55 + 0.05 * ((indexes + index) % 10)
         yield FrameDetections(source, index, index / fps, rows)
 
 
@@ -208,6 +213,52 @@ def oru_benchmark(
     }
 
 
+def adaptive_benchmark(
+    config: TrackingConfig, frames: int, warmup: int, repeat: int, fps: float, nsa: NSAConfig
+) -> dict:
+    profiles = ablation_profiles(nsa)
+    names = list(profiles)
+    detections = min(config.max_tracks, config.max_detections)
+    recovery_period = _LAST_VISIBLE + config.max_age + 1
+    counter_keys = (*vars(NSAStats()), *vars(ReplayStats()))
+    cases = {}
+    for scenario, period in (("dense", None), ("dense_misses", recovery_period)):
+        runs = {name: [] for name in names}
+        inputs = tuple(_synthetic_frames(
+            scenario, detections, 12, warmup + frames, fps, occlusion_period=period, vary_scores=True
+        ))
+        for run in range(repeat):
+            offset = run % len(names)
+            for name in names[offset:] + names[:offset]:
+                tracker = Tracker(config, **profiles[name])
+                profile = _ReappearanceProfile(warmup, frames, fps, period)
+                write_tracks(inputs, tracker, None, profile=profile)
+                report = profile.report()
+                for field in ("workload_totals", "workload_peaks"):
+                    for key in counter_keys:
+                        report[field].setdefault(key, 0)
+                runs[name].append(report)
+        cases[scenario] = {
+            "frame_size_px": [tracker.source.width, tracker.source.height],
+            "detections_per_visible_frame": detections,
+            "runs": runs,
+        }
+    return {
+        "schema_version": 1,
+        "benchmark": "confidence_adaptive_tracking",
+        "scope": "synthetic_tracking_core_only",
+        "device": "cpu",
+        "environment": environment(),
+        "tracker_config": asdict(config),
+        "profiles": {name: {key: asdict(value) for key, value in options.items()} for name, options in profiles.items()},
+        "sampling": {
+            "frames": frames, "warmup": warmup, "repeat": repeat, "target_fps": fps,
+            "occlusion_period": recovery_period, "reappearance_phase": _REAPPEARANCE,
+        },
+        "cases": cases,
+    }
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description="生成跟踪核心的可复现合成基准")
     parser.add_argument("--output", type=Path, required=True, help="新建基准 JSON")
@@ -220,6 +271,8 @@ def main(argv=None) -> int:
     modes = parser.add_mutually_exclusive_group()
     modes.add_argument("--association", action="store_true", help="对比 OCM/OCR 开关与密集遮挡重现")
     modes.add_argument("--oru", action="store_true", help="对比同步重现场景的 ORU 开关")
+    modes.add_argument("--nsa", action="store_true", help="运行包含 NSA 的组合消融")
+    parser.add_argument("--nsa-min-scale", type=float, default=NSAConfig.min_scale)
     parser.add_argument("--oru-max-missing", type=int, default=ORUConfig.max_missing)
     parser.add_argument("--oru-max-steps", type=int, default=ORUConfig.max_steps)
     parser.add_argument("--oru-noise-scale", type=float, default=ORUConfig.noise_scale)
@@ -231,6 +284,8 @@ def main(argv=None) -> int:
         sampling = (config, args.frames, args.warmup, args.repeat, args.target_fps)
         if args.oru:
             report = oru_benchmark(*sampling, ORUConfig(args.oru_max_missing, args.oru_max_steps, args.oru_noise_scale))
+        elif args.nsa:
+            report = adaptive_benchmark(*sampling, NSAConfig(args.nsa_min_scale))
         else:
             measure = association_benchmark if args.association else benchmark
             report = measure(*sampling)

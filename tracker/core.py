@@ -12,12 +12,14 @@ from ultralytics.utils.metrics import bbox_ioa
 
 from .association import OCMConfig, OCRConfig, ObservationMotion, apply_momentum
 from .kalman import TrackingKalman
+from .nsa import NSAConfig, update_real_observations
 from .records import (
     AssociationStats,
     FrameDetections,
     FrameSequence,
     FrameStats,
     FrameTracks,
+    NSAStats,
     ReplayStats,
     TrackObservation,
     TrackPrediction,
@@ -27,6 +29,7 @@ from .replay import ORUConfig, ReplaySnapshot, replay_prediction
 
 
 _EMPTY_REPLAY_STATS = ReplayStats()
+_EMPTY_NSA_STATS = NSAStats()
 
 
 @dataclass(frozen=True)
@@ -120,12 +123,14 @@ class Tracker:
     def __init__(
         self, config: TrackingConfig | None = None, *, debug_predictions: bool = False,
         ocm: OCMConfig | None = None, ocr: OCRConfig | None = None, oru: ORUConfig | None = None,
+        nsa: NSAConfig | None = None,
     ) -> None:
         self.config = config if config is not None else TrackingConfig()
         self.debug_predictions = debug_predictions
         self.ocm = ocm
         self.ocr = ocr
         self.oru = oru
+        self.nsa = nsa
         self._kalman = TrackingKalman()
         self._sequence = FrameSequence()
         self._tracks: dict[int, _Track] = {}
@@ -151,14 +156,25 @@ class Tracker:
             track.covariance = covariance
         return means
 
-    def _observe(self, tracks: list[_Track], measurements: np.ndarray, frame_id: int) -> None:
-        means, covariances = self._kalman.update_batch(
-            np.stack([track.mean for track in tracks]),
-            np.stack([track.covariance for track in tracks]),
-            measurements,
-        )
+    def _observe(
+        self, tracks: list[_Track], measurements: np.ndarray, scores: np.ndarray | None, frame_id: int,
+    ) -> tuple[ReplayStats | None, np.ndarray | None, NSAStats | None]:
+        means = np.stack([track.mean for track in tracks])
+        covariances = np.stack([track.covariance for track in tracks])
+        replay = self._replay_matches(tracks, measurements, frame_id, means, covariances) if self.oru else None
+        accepted = nsa_stats = None
+        if self.nsa is None:
+            means, covariances = self._kalman.update_batch(means, covariances, measurements)
+        else:
+            means, covariances, accepted, nsa_stats = update_real_observations(
+                self._kalman, means, covariances, measurements, scores, self.nsa
+            )
         valid_sizes = (means[:, 2:4] > 0).all(axis=1)
-        for track, mean, covariance, measurement, usable in zip(tracks, means, covariances, measurements, valid_sizes):
+        for index, (track, mean, covariance, measurement, usable) in enumerate(
+            zip(tracks, means, covariances, measurements, valid_sizes)
+        ):
+            if accepted is not None and not accepted[index]:
+                continue
             if not usable:
                 mean, covariance = self._kalman.initiate(measurement)
             track.mean, track.covariance = mean, covariance
@@ -170,8 +186,11 @@ class Tracker:
                 track.motion.observe(frame_id, *measurement[:2], self.ocm)
             if track.hits >= self.config.min_hits:
                 track.state = TrackState.ACTIVE
+        return replay, accepted, nsa_stats
 
-    def _replay_matches(self, tracks: list[_Track], measurements: np.ndarray, frame_id: int) -> ReplayStats:
+    def _replay_matches(
+        self, tracks: list[_Track], measurements: np.ndarray, frame_id: int, means: np.ndarray, covariances: np.ndarray,
+    ) -> ReplayStats:
         config = self.oru
         requests = sorted(
             (frame_id - track.last_frame - 1, track.track_id, index)
@@ -201,7 +220,7 @@ class Tracker:
             if prior is None:
                 invalid += 1
             else:
-                track.mean, track.covariance = prior
+                means[index], covariances[index] = prior
                 replayed += 1
         return ReplayStats(
             oru_requests=len(requests), oru_replayed=replayed, oru_steps=steps, oru_track_limit=track_limit,
@@ -303,16 +322,22 @@ class Tracker:
         recovered = set(recovered) if len(recovered) else ()
 
         replay = _EMPTY_REPLAY_STATS if self.oru is not None else None
+        nsa_stats = _EMPTY_NSA_STATS if self.nsa is not None else None
+        real_updates = 0
         matched = matched_candidates >= 0
         if matched.any():
             track_indexes = np.flatnonzero(matched)
             matched_tracks = [tracks[i] for i in track_indexes]
             candidate_indexes = matched_candidates[track_indexes]
             matched_measurements = measurements[candidate_indexes]
-            if self.oru is not None:
-                replay = self._replay_matches(matched_tracks, matched_measurements, frame.frame_id)
-            self._observe(matched_tracks, matched_measurements, frame.frame_id)
+            scores = candidates[candidate_indexes, 4] if self.nsa is not None else None
+            replay, accepted, nsa_stats = self._observe(matched_tracks, matched_measurements, scores, frame.frame_id)
+            if accepted is not None:
+                matched[track_indexes[~accepted]] = False
+            real_updates = len(track_indexes) - (nsa_stats.nsa_failed_updates if nsa_stats is not None else 0)
             for index, track, i in zip(track_indexes, matched_tracks, candidate_indexes):
+                if not matched[index]:
+                    continue
                 if self.ocr is not None:
                     track.last_box = candidates[i, :4].copy()
                 if track.state is TrackState.ACTIVE:
@@ -323,7 +348,10 @@ class Tracker:
 
         for track_idx in np.flatnonzero(~matched):
             track = tracks[track_idx]
-            if track.state is TrackState.TENTATIVE:
+            failed = matched_candidates[track_idx] >= 0
+            if track.state is TrackState.TENTATIVE or (failed and not (
+                np.isfinite(track.mean).all() and np.isfinite(track.covariance).all()
+            )):
                 del self._tracks[track.track_id]
                 continue
             track.state = TrackState.LOST
@@ -363,6 +391,8 @@ class Tracker:
             tuple(predicted),
             association,
             replay,
+            nsa_stats,
+            real_updates,
         )
 
     @staticmethod
